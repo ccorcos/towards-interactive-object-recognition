@@ -3,30 +3,17 @@ from pylab import *
 # Karol's C++ program will gather data and compute errors. This must only
 # deal with probabilities, etc.
 
+# TODO
+# joint distribution
+# mixture distribution
+# parallelize
+# expectation
+# entropy
+# check for bugs
+
 # or a function to set these
 objects = ['book1', 'book2', 'book3']
 poses = ['up-forward', 'up-backward', 'down-forward', 'down-backward']
-
-
-# 		1
-# p1 =	0
-# 		0
-# 		0
-
-# 		0
-# p2 = 	1
-# 		0
-# 		0
-
-# 		0
-# p3 = 	0
-# 		1
-# 		0
-
-# 		0
-# p4 = 	0
-# 		0
-# 		1
 
 
 def pose2vec(name):
@@ -39,27 +26,6 @@ def vec2pose(vec):
     return poses[vec.index(1)]
 
 actions = ['stay', 'flip', 'rotate', 'flipRotate']
-
-# suppose the next pose is computed by pi' = ai*pi
-# 		1 0 0 0
-# a1 = 	0 1 0 0
-# 		0 0 1 0
-# 		0 0 0 1
-
-# 		0 0 1 0
-# a2 = 	0 0 0 1
-# 		1 0 0 0
-# 		0 1 0 0
-
-# 		0 1 0 0
-# a3 = 	1 0 0 0
-# 		0 0 0 1
-# 		0 0 1 0
-
-# 		0 0 0 1
-# a4 = 	0 0 1 0
-# 		0 1 0 0
-# 		1 0 0 0
 
 stay = eye(4)
 flip = zeros([4, 4])
@@ -95,126 +61,165 @@ def mat2action(mat):
         raise "invalid action matrix, " + str(mat)
 
 
-def emptyArray(shape):
-    # initialize an empty array with a defined shape
-    a = None
-    for i in shape[::-1]:
-        a = [a] * i
-    return array(a)
-
-
-def wrap(func, args):
-    # make a wrapper to pass list of args as args
-    func(*args)
-
-
-class ArrayCache:
-
-    def __init__(self, shape, fcn):
-        self.cache = emptyArray(shape)
-        self.fcn = fcn
-
-    def __str__(self):
-        return str(self.cache.tolist)
-
-    def __getitem__(self, index):
-        items = self.cache.__getitem__(index)
-        for i in items:
-            if i == None:
-
-# For now, we will assume all features are SURF features and modeled as
-# Gaussian
-
-
-class Gaussian:
-
-    def __init__(self, values):
-    # values = array[sample][value]
-        v = array(values)
-        self.m = mean(values, 0)
-        self.c = cov(valuee.T)
-
-    def prob(self, value):
-        v = array(value)
-        d = len(self.m)
-        return pow(2 * pi, -d / 2.0) / sqrt(det(self.c)) * \
-            exp(-0.5 * (v - self.m) * pinv(self.c) * (v - self.m).T)
-
-    def expectedValue(self):
-        return self.mu
-
-
 def train(errors):
     # errors = array[object][pose][feature][sample]
-    # This function learns a distribution, p(f|o,p)
+    # save the errors. train in real time
 
     global nObjects, nPoses, nFeatures, nTrainingSamples, nActions, nObservations
     nObjects, nPoses, nFeatures, nTrainingSamples = errors.shape
     nActions = nObservations = nPoses
 
-    initCaches()
-
-    for n in range(N):
-        for i in range(I):
-            for m in range(M):
-                dfgop[n, i, m] = Gaussian(errors[n, i, m, :])
-
-    # cache_dFgop initialize
-    # cache_dF initialize
+    global trainingErrors
+    trainingErrors = errors
 
 
-def initCaches():
-        # initalize some caches and constants
-    global cache_dfgop  # learned distribution
-    cache_dfgop = emptyArray([nObjects, nPoses, nFeatures])
+class memorize(dict):
+    # cache function calls
 
-    global cache_dFgop  # learned joint distribution
-    cache_dFgop = emptyArray([nObjects, nPoses])
+    def __init__(self, func):
+        self.func = func
 
-    global cache_pFgop
-    cache_pFgop = emptyArray([nObservations, nObjects, nPoses])
+    def __call__(self, *args):
+        return self[args]
 
-    global cache_F  # observed features
-    cache_F = emptyArray([nObservations, nFeatures])
-
-    global cache_prob_evidence
-    cache_prob_evidence = emptyArray([nObservations])
-
-    global cache_dist_evidence
-    cache_dist_evidence = emptyArray([nObservations])
-
-    global cache_pFgop
-    cache_pFgop = emptyArray([nObservations, nObjects, nPoses])
-
-    global pop
-    pop = 1.0 / float(nObjects * nPoses)
-
-    global cache_posterior_prob_op
-    cache_posterior_prob_op = emptyArray([nObservations, nObjects, nPoses])
-
-    global cache_posterior_dist_op
-    cache_posterior_dist_op = emptyArray([nObservations, nObjects, nPoses])
-
-    global cache_posterior_prob_o
-    cache_posterior_prob_o = emptyArray([nObservations, nObjects])
-
-    global cache_posterior_dist_o
-    cache_posterior_dist_o = emptyArray([nObservations, nObjects])
+    def __missing__(self, key):
+        result = self[key] = self.func(*key)
+        return result
 
 
-def observe(errors):
-    # errors = array[feature]
-    # solve for the posterior
+@memorize
+def nextPoseIdx(idxPreviousPose, idxAction):
+    actionName = actions[idxAction]
+    previousPoseName = poses[idxPreviousPose]
+    nextPoseVec = inner(action2mat(actionName), pose2vec(previousPoseName))
+    nextPoseName = vec2pose(nextPoseVec)
+    return poses.index(nextPoseName)
 
-    # if the first observation
-    if not cache_pFgop[0, 0, 0]:
-        for obj in range(nObjects):
-            for pose in range(nPoses):
-                cache_posterior_prob_op[0, obj, pose] = pop/
-    else:
+
+@memorize
+def previousPoseIdx(idxNextPose, idxAction):
+    actionName = actions[idxAction]
+    nextPoseName = poses[idxNextPose]
+    prevPoseVec = inner(inv(action2mat(actionName)), pose2vec(nextPoseName))
+    prevPoseName = vec2pose(prevPoseVec)
+    return poses.index(prevPoseName)
+
+
+class Distribution:
+
+    def __init__(self, values):
+        # learn
+
+    def prob(self, value):
+        pass
+
+    def expectedValue(self):
         pass
 
 
-def observeFirst(errors):
-    # errors = array[feature]
-    # solve for the posterior
+@memorize
+def dfgop(idxObject, idxPose, idxFeature):
+    # likelihood distribution
+    return Distribution(errors[idxObject, idxPose, idxFeature, :])
+
+
+@memorize
+def dFgop(idxObject, idxPose):
+    # likelihood joint distribution
+    return prod([dfgop(idxObject, idxPose, idxFeature) for idxFeature in range(nFeatures)])
+
+
+observationHistory = []
+objectProbHistory = []
+actionHistory = [None]
+
+
+def observe(error):
+    global observationHistory
+    idxObservation = len(observationHistory)
+    observationHistory.append(error)
+    objectProbHistory.append(posterior_O_prob(idxObservation))
+    # TODO
+    # compute expectation
+    # compute entropy
+    # determine the best action
+
+
+@memorize
+def pop():
+    # prior
+    return 1.0 / float(nObjects * nPoses)
+
+
+@memorize
+def pfgop(idxObservation, idxObject, idxPose, idxFeature):
+    # likelihood probability
+    return dfgop(idxObject, idxPose, idxFeature).prob(observationHistory[idxObservation][idxFeature])
+
+
+@memorize
+def pFgop(idxObservation, idxObject, idxPose):
+    # likelihood joint probability
+    return dFgop(idxObject, idxPose).prob(observationHistory[idxObservation])
+
+
+@memorize
+def pF(idxObservation):
+    # evidence for the first observation.
+    # also shows the novelty of the features found
+    return pop() * sum([pFgop(idxObservation, idxObject, idxPose) for idxObject, idxPose in zip(range(len(objects)), range(len(poses)))])
+    pass
+
+
+@memorize
+def posterior_op_prob(idxObservation, idxObject, idxPose):
+    if idxObservation == 0:
+        return pop() * pFgop(idxObservation, idxObject, idxPose) / pF(idxObservation)
+    else:
+        posterior_op_dist(idxObservation, idxObject,
+                          idxPose, actionHistory(idxObservation)).prob(idxObservation)
+
+
+@memorize
+def posterior_o_prob(idxObservation, idxObject):
+    if idxObservation == 0:
+        return sum([posterior_op_prob(idxObservation, idxObject, idxPose) for idxPose in range(nPoses)])
+    else:
+        posterior_o_dist(idxObservation, idxObject,
+                         actionHistory(idxObservation)).prob(idxObservation)
+
+
+@memorize
+def posterior_O_prob(idxObservation):
+    # distribution of object probabilities
+    return [posterior_o_prob(idxObservation, idxObject) for idxObject in range(nObjects)]
+
+
+@memorize
+def posterior_op_dist(idxObservation, idxObject, idxPose, idxAction):
+    fromPoseIdx = previousPoseIdx(idxPose, idxAction)
+    lastPosterior = posterior_op_prob(
+        idxObservation - 1, idxObject, fromPoseIdx)
+    likelihoodDistribution = dFgop(idxObservation, idxObject, idxPose)
+    evidenceDistribution = evidence_dist(idxObservation)
+    return lastPosterior * likelihoodDistribution / evidenceDistribution
+
+
+@memorize
+def posterior_o_dist(idxObservation, idxObject, idxAction):
+    return sum([posterior_op_dist(idxObservation, idxObject, idxPose, idxAction) for idxPose in range(nPoses)])
+
+
+@memorize
+def evidence_dist(idxObservation):
+    accumulate = []
+    for idxPose in range(len(poses)):
+        for idxAction in range(len(actions)):
+            for idxObject in range(len(objects)):
+                fromPoseIdx = previousPoseIdx(idxPose, idxAction)
+                lastPosterior = posterior_op_prob(
+                    idxObservation - 1, idxObject, fromPoseIdx)
+                likelihoodDistribution = dFgop(
+                    idxObservation, idxObject, idxPose)
+                accumulate.append(lastPosterior * likelihoodDistribution)
+    return sum(accumulate)

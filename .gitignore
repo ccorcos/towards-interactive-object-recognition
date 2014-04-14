@@ -1,10 +1,5 @@
-# for macs
 **.DS_Store 
-
-# for python
 **.pyc 
-
-# for latex
 **.aux
 **.log
 **.out

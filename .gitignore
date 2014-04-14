@@ -1,13 +1,13 @@
 # for macs
-*.DS_Store 
+**.DS_Store 
 
 # for python
-*.pyc 
+**.pyc 
 
 # for latex
-*.aux
-*.log
-*.out
-*.bbl
-*.bbg
-*.toc
+**.aux
+**.log
+**.out
+**.bbl
+**.bbg
+**.toc

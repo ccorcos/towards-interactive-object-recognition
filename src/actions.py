@@ -1,4 +1,5 @@
 from pylab import *
+from importData import *
 
 # Karol's C++ program will gather data and compute errors. This must only
 # deal with probabilities, etc.
@@ -10,55 +11,6 @@ from pylab import *
 # expectation
 # entropy
 # check for bugs
-
-# or a function to set these
-objects = ['book1', 'book2', 'book3']
-poses = ['up-forward', 'up-backward', 'down-forward', 'down-backward']
-
-
-def pose2vec(name):
-    vec = zeros(len(poses))
-    vec[poses.index(name)] = 1
-    return vec
-
-
-def vec2pose(vec):
-    return poses[vec.index(1)]
-
-actions = ['stay', 'flip', 'rotate', 'flipRotate']
-
-stay = eye(4)
-flip = zeros([4, 4])
-flip[0, 2] = flip[1, 3] = flip[2, 0] = flip[3, 1] = 1
-rotate = zeros([4, 4])
-rotate[0, 1] = rotate[1, 0] = rotate[2, 3] = rotate[3, 2] = 1
-flipRotate = eye(4)[::-1]
-
-
-def action2mat(name):
-    if name == 'stay':
-        return stay
-    elif name == 'flip':
-        return flip
-    elif name == 'rotate':
-        return rotate
-    elif name == 'flipRotate':
-        return flipRotate
-    else:
-        raise "invalid action name, " + name
-
-
-def mat2action(mat):
-    if array_equal(mat, stay):
-        return'stay':
-    elif array_equal(mat, flip):
-        return'flip':
-        elif array_equal(mat, rotate):
-        return'rotate':
-    elif array_equal(mat, flipRotate):
-        return'flipRotate':
-    else:
-        raise "invalid action matrix, " + str(mat)
 
 
 def train(errors):

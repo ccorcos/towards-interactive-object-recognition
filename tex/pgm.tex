@@ -149,8 +149,8 @@
 		\plate {pf} {(F)} {$M$}
 		\plate {pf2} {(F2)} {$M$}
 
-		\plate {} {(F)(P)(A)(pf)} {$t=0$}
-		\plate {} {(F2)(P2)(A2)(pf2)} {$t+1$}
+		\plate {} {(F)(P)(A)(pf)} {$t=1$}
+		\plate {} {(F2)(P2)(A2)(pf2)} {$t=2$}
 
 	\end{tikzpicture}
 	\end{center}
@@ -199,9 +199,9 @@
 		\plate {pf2} {(F2)} {$M$}
 		\plate {pf3} {(F3)} {$M$}
 
-		\plate {} {(F)(P)(A)(pf)} {$t=0$}
-		\plate {} {(F2)(A2)(pf2)} {$t+1$}
-		\plate {} {(F3)(A3)(pf3)} {$t+2$}
+		\plate {} {(F)(P)(A)(pf)} {$t=1$}
+		\plate {} {(F2)(A2)(pf2)} {$t=2$}
+		\plate {} {(F3)(A3)(pf3)} {$t=3$}
 
 		\draw [dotted, thick] (7.5,1.5) -- (7.85,1.5);
 	\end{tikzpicture}
@@ -212,6 +212,47 @@
 	Note that we are merely updating the previous posterior, $\prob{o,P_n|\SetOf{F}_{1:n},A_{1:n-1}}$. 
 
 	\Eq{a^* &= \argmin_{A_n} \entropy{\expectedValue{O|\SetOf{F}_{1:n+1},A_{1:n}}{\SetOf{F}_{n+1} \sim \prob{\SetOf{F_{n+1}}|\SetOf{F}_{1:n},A_{1:n}}}}}
+
+\section{Algorithm}
+
+	From the training, we learn $\prob{f|o,p}$.  
+	
+	We must keep track of the posterior, evidence, and likelihoods.
+
+	\begin{center}
+		\begin{tabular}{c|c|c|c} % number of columns and vertical lines
+			\hline % top horizontal line
+			Time & Posterior & Evidence & Likelihood\\
+			[0.5ex] % [0.5ex] adds vertical space
+			\hline\hline % inserts double-line
+			0 & $\prob{o,p}$ & & \\[0.5ex] 
+			1 & $\prob{o,p|\SetOf{F}_1}$ & $\prob{\SetOf{F}_1}$ & $\prob{\SetOf{F}_1|o,p}$ \\[0.5ex] 
+			2 & $\prob{o,p|\SetOf{F}_1,\SetOf{F}_2,A_1}$ & $\prob{\SetOf{F}_2|\SetOf{F}_1,A_1}$ & $\prob{\SetOf{F}_2|o,p}$ \\
+			...&...&...&...\\[0.5ex] 
+			t & $\prob{o,p|\SetOf{F}_{1:t},A_{1:t-1}}$ & $\prob{\SetOf{F}_t|\SetOf{F}_{1:t-1},A_{1:t-1}}$ & $\prob{\SetOf{F}_t|o,p}$
+		\end{tabular}
+		\label{tab:reference}
+	\end{center}
+
+	We want to keep track of the posterior for each $o,p$. If we observe $\SetOf{F}_t$, then we can directly compute the likelihood 
+	\Eq{\prob{\SetOf{F}_t|o,p} &= \prod_{f_t \in \SetOf{F}_t} \prob{f_t|o,p}} 
+	and update the posterior
+	\Eq{\text{posterior}_t &= \frac{\text{posterior}_{t-1}*\text{likelihood}_t}{\text{evidence}_t}\\
+	&= \frac{\text{posterior}_{t-1}*\text{likelihood}_t}{\sum \text{posterior}_{t-1}*\text{likelihood}_t}}
+
+	However, when we predict the optimal action, the likelihood is not observed. This likelihood is a very high dimensional joint distribution. To make computation easier, we can sample the distribution. Because $\prob{\SetOf{F}_t|o,p} = \prod_{f_t \in \SetOf{F}_t} \prob{f_t|o,p}$ is composed of independent features, we can sample from each distribution individually and combine them into a multidimensional sample of the distribution. We can treat these samples as particles. 
+
+	First compute the evidence distribution, 
+	\Eq{\prob{\SetOf{F}_{t+1}|\SetOf{F}_{1:t},A_{1:t}} &= \sum_{O,P_{t+1},P_{t}}\prob{O,P_{t}|\SetOf{F}_{1:t},A_{1:t-1}}\prob{\SetOf{F}_{t+1}|O,P_{t+1}}\prob{P_{t+1}|P_t,A_t}}
+	Considering actions are deterministic, $A_t*P_t=P_{t+1}$, we can get rid of one of the summations:
+	\Eq{\prob{\SetOf{F}_{t+1}|\SetOf{F}_{1:t},A_{1:t}} &= \sum_{O,P_{t}}\prob{O,P_{t}|\SetOf{F}_{1:t},A_{1:t-1}}\prob{\SetOf{F}_{t+1}|O,P_{t+1}}}
+	The resulting particles are then used to sample the posterior
+	\Eq{\prob{o,P_{t+1}|\SetOf{F}_{1:t+1},A_{1:t}} &= \prob{o,P_t|\SetOf{F}_{1:t},A_{1:t-1}} \prob{\SetOf{F}_{t+1}|o,P_{t+1}}_{\SetOf{F}_{t+1} \sim \prob{\SetOf{F}_{t+1}|\SetOf{F}_{1:t},A_{1:t}}}}
+	Then, taking the average of these particles gives us the expected value.
+
+
+	
+
 
 \section{Questions}
 	1) We never learned about bayesian factor graphs, but it seems that we could learn a multivatiate distribution to directly learn $\prob{\SetOf{F}|o,p}$:

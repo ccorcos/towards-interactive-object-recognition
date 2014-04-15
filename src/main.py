@@ -262,6 +262,9 @@ class Distribution1D:
     def pdf(self, values):
         return normpdf(values, self.mu, self.sigma)
 
+    def logpdf(self, value):
+        return -log(self.sigma * sqrt(2 * pi)) - (value - self.mu) ** 2 / (2 * self.sigma ** 2)
+
 
 @memorize
 def dfgop(idxObject, idxPose, idxFeature):
@@ -318,16 +321,6 @@ def likelihood(idxObservation, idxObject, idxPose):
             "ERROR: Observation length != number of features in the model")
     # PARALLELIZE
     # independent features assumption leads to a product of their probabilities
-    #
-    # LOG
-    # accumulate = 0
-    # for idxFeature in range(M):
-    #     pdf = dfgop(idxObject,
-    #                 idxPose,
-    #                 idxFeature).pdf(observation[idxFeature])
-    #     logpdf = log10(pdf)
-    #     accumulate = accumulate + logpdf
-    # return 10 ** accumulate
     accumulate = 1
     for idxFeature in range(M):
         pdf = dfgop(idxObject,

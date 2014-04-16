@@ -15,6 +15,7 @@
 
 from pylab import *
 from mpl_toolkits.mplot3d import Axes3D
+from memoize import *
 
 from utils import *
 import pprint
@@ -49,20 +50,7 @@ def clearHistory():
     global observationHistory, actionHistory
     observationHistory = [[]]
     actionHistory = [[]]
-    nextPose.reset()
-    prevPose.reset()
-    nextPoseIdx.reset()
-    prevPoseIdx.reset()
-    pose2idx.reset()
-    obj2idx.reset()
-    action2idx.reset()
-    dfgop.reset()
-    logPosterior_op.reset()
-    logLikelihood.reset()
-    logEvidence.reset()
-    evidence.reset()
-    likelihood.reset()
-    posterior_op.reset()
+    clearAllMemoized()
 
 
 def whichObservationIdx():
@@ -135,7 +123,7 @@ def importData():
     K = N * I
 
 
-@memorize
+@memoize
 def nextPose(pose, action):
     """Returns the pose after an action is applied to a pose"""
     if pose not in poses:
@@ -181,7 +169,7 @@ def nextPose(pose, action):
         raise ex("ERROR: Should never be here")
 
 
-@memorize
+@memoize
 def prevPose(pose, action):
     # these actions pose combinations just happen to be complementary so
     # its the same thing...
@@ -228,27 +216,27 @@ def prevPose(pose, action):
         raise ex("ERROR: Should never be here")
 
 
-@memorize
+@memoize
 def nextPoseIdx(poseIdx, actionIdx):
     return pose.index(nextPose(poses[poseIdx], actions[actionIdx]))
 
 
-@memorize
+@memoize
 def prevPoseIdx(poseIdx, actionIdx):
     return pose.index(prevPose(poses[poseIdx], actions[actionIdx]))
 
 
-@memorize
+@memoize
 def pose2idx(pose):
     return poses.index(pose)
 
 
-@memorize
+@memoize
 def obj2idx(obj):
     return objects.index(obj)
 
 
-@memorize
+@memoize
 def action2idx(action):
     return actions.index(action)
 
@@ -273,7 +261,7 @@ class Distribution1D:
         return -log(self.sigma * sqrt(2 * pi)) - (value - self.mu) ** 2 / (2 * self.sigma ** 2)
 
 
-@memorize
+@memoize
 def dfgop(idxObject, idxPose, idxFeature):
     # likelihood distribution
     return Distribution1D(trainingErrors[idxObject, idxPose, idxFeature, :])
@@ -300,7 +288,7 @@ def plotTraining(idxObject, idxPose):
     show()
 
 
-@memorize
+@memoize
 def logPosterior_op(idxObservation, idxObject, idxPose):
     if (idxObservation == 0):
         return 1. / K
@@ -332,7 +320,7 @@ def logPosterior_op(idxObservation, idxObject, idxPose):
         return logPrior + thisLogLikelihood - thisLogEvidence
 
 
-@memorize
+@memoize
 def logLikelihood(idxObservation, idxObject, idxPose):
     observation = observationHistory[idxObservation]
     if len(observation) != M:
@@ -354,7 +342,7 @@ def logOfSumGivenLogs(aLogs):
     return log(sum([exp(logA - logC) for logA in aLogs])) + logC
 
 
-@memorize
+@memoize
 def logEvidence(idxObservation):
     # The Trick:
     # log (a+ b) = log (a/c + b/c) + log c
@@ -395,17 +383,17 @@ def logEvidence(idxObservation):
     return logOfSumGivenLogs(logTerms)
 
 
-@memorize
+@memoize
 def posterior_op(idxObservation, idxObject, idxPose):
     return exp(logPosterior_op(idxObservation, idxObject, idxPose))
 
 
-@memorize
+@memoize
 def likelihood(idxObservation, idxObject, idxPose):
     return exp(logLikelihood(idxObservation, idxObject, idxPose))
 
 
-@memorize
+@memoize
 def evidence(idxObservation):
     return exp(logEvidence(idxObservation))
 
@@ -456,11 +444,10 @@ train()
 data = trainingErrors[2, 1, :, 0]
 observe(data)
 plotPosterior(1)
-print posterior_op
-posterior_op.reset()
+
 clearHistory()
-print posterior_op
-data = trainingErrors[2, 1, :, 0]
+
+data = trainingErrors[1, 0, :, 0]
 observe(data)
 plotPosterior(1)
 

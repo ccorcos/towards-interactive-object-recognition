@@ -50,7 +50,13 @@ def clearHistory():
     global observationHistory, actionHistory
     observationHistory = [[]]
     actionHistory = [[]]
-    clearAllMemoized()
+    # clearAllMemoized()
+    logPosterior_op.reset()
+    logLikelihood.reset()
+    logEvidence.reset()
+    posterior_op.reset()
+    likelihood.reset()
+    evidence.reset()
 
 
 def whichObservationIdx():
@@ -433,6 +439,27 @@ def posteriors(idxObservation):
                    for i in range(I)]
                   for n in range(N)])
 
+
+def plotPosteriors(ps, objectName="", poseName=""):
+    xn, yn = ps[0].shape
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    title(objectName + " - " + poseName)
+
+    cm = get_cmap('gist_rainbow')
+
+    for i in range(len(ps)):
+        posterior = ps[i]
+        color = cm(1. * i / len(ps))
+        ax.plot_wireframe(array([range(xn)] * yn).T,
+                          array([range(yn)] * xn),
+                          posterior,
+                          color=color)
+    xticks(range(N), objects)
+    yticks(range(I), poses)
+    show()
+
+
 importData()
 train()
 # plotTraining(0, 0)
@@ -441,39 +468,13 @@ train()
 # Test with a training sample
 #
 
-data = trainingErrors[2, 1, :, 0]
-observe(data)
-plotPosterior(1)
-
-clearHistory()
-
-data = trainingErrors[1, 0, :, 0]
-observe(data)
-plotPosterior(1)
-
-
-def plotPosteriors(ps, objectName="", poseName=""):
-    xn, yn = ps[0].shape
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
-    title(objectName + " - " + poseName)
-    for posterior in ps:
-        ax.plot_wireframe(array([range(xn)] * yn).T,
-                          array([range(yn)] * xn),
-                          posterior)
-    xticks(range(N), objects)
-    yticks(range(I), poses)
-    show()
-
-
-# for oi in range(N):
-#     for pi in range(I):
-#         ps = []
-#         for ri in range(R):
-#             data = trainingErrors[oi, pi, :, ri]
-#             observe(data)
-#             ps.append(posteriors(1))
-#             print ps[0]
-#             wait()
-#             clearHistory()
-#         plotPosteriors(ps, objects[oi], poses[pi])
+for n in range(N):
+    for i in range(I):
+        ps = []
+        for r in range(R):
+            print "object: " + str(n) + ", pose: " + str(i) + ", sample: " + str(r)
+            data = trainingErrors[n, i, :, r]
+            observe(data)
+            ps.append(posteriors(1))
+            clearHistory()
+        plotPosteriors(ps, objects[n], poses[i])

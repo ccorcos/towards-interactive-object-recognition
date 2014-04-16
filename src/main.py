@@ -20,7 +20,7 @@ from utils import *
 import pprint
 
 # trainingData = {"objectname":{"posename":[feature][training sample]}}
-# errors = [objects][poses][features][training samples]
+# trainingErrors = [objects][poses][features][training samples]
 # N objects
 # I poses
 # J actions
@@ -33,7 +33,7 @@ import pprint
 objects = []
 poses = []
 trainingData = {}
-errors = []
+trainingErrors = []
 N = I = J = K = M = R = 0
 
 # FIX: Hard coded actions
@@ -43,6 +43,26 @@ actions = ['stay', 'rotate', 'flip', 'flip-rotate']
 # t = 0 represents the prior
 observationHistory = [[]]  # no observation or action at t=0
 actionHistory = [[]]  # no observation or action at t=0
+
+
+def clearHistory():
+    global observationHistory, actionHistory
+    observationHistory = [[]]
+    actionHistory = [[]]
+    nextPose.reset()
+    prevPose.reset()
+    nextPoseIdx.reset()
+    prevPoseIdx.reset()
+    pose2idx.reset()
+    obj2idx.reset()
+    action2idx.reset()
+    dfgop.reset()
+    logPosterior_op.reset()
+    logLikelihood.reset()
+    logEvidence.reset()
+    evidence.reset()
+    likelihood.reset()
+    posterior_op.reset()
 
 
 def whichObservationIdx():
@@ -97,20 +117,20 @@ def importData():
     pprint.pprint(poses)
     # ['down', 'down-spine', 'up-spine', 'up']
 
-    global N, I, J, K, M, R, errors
+    global N, I, J, K, M, R, trainingErrors
     N = len(objects)
     I = len(poses)
     J = len(actions)
 
-    errors = []
+    trainingErrors = []
     for n in range(N):
         obj = objects[n]
-        errors.append([])
+        trainingErrors.append([])
         for i in range(I):
             pose = poses[i]
-            errors[n].append(trainingData[obj][pose])
-    errors = array(errors)
-    _, _, M, R = errors.shape
+            trainingErrors[n].append(trainingData[obj][pose])
+    trainingErrors = array(trainingErrors)
+    _, _, M, R = trainingErrors.shape
 
     K = N * I
 
@@ -256,7 +276,7 @@ class Distribution1D:
 @memorize
 def dfgop(idxObject, idxPose, idxFeature):
     # likelihood distribution
-    return Distribution1D(errors[idxObject, idxPose, idxFeature, :])
+    return Distribution1D(trainingErrors[idxObject, idxPose, idxFeature, :])
 
 
 def train():
@@ -407,35 +427,66 @@ def observe(F):
 
 
 def plotPosterior(idxObservation):
-    posteriors = array([[posterior_op(idxObservation, n, i)
-                        for i in range(I)]
-                       for n in range(N)])
-
-    xn, yn = posteriors.shape
+    ps = posteriors(idxObservation)
+    xn, yn = ps.shape
 
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
     title("Observation: " + str(idxObservation))
     ax.plot_wireframe(
-        array([range(xn)] * yn).T, array([range(yn)] * xn), posteriors)
+        array([range(xn)] * yn).T, array([range(yn)] * xn), ps)
     xticks(range(N), objects)
     yticks(range(I), poses)
     show()
 
+
+def posteriors(idxObservation):
+    return array([[posterior_op(idxObservation, n, i)
+                   for i in range(I)]
+                  for n in range(N)])
+
 importData()
 train()
-
 # plotTraining(0, 0)
-
 
 #
 # Test with a training sample
 #
 
-oi = 0
-pi = 1
-r = 0
-
-data = errors[oi, pi, :, r]
+data = trainingErrors[2, 1, :, 0]
 observe(data)
 plotPosterior(1)
+print posterior_op
+posterior_op.reset()
+clearHistory()
+print posterior_op
+data = trainingErrors[2, 1, :, 0]
+observe(data)
+plotPosterior(1)
+
+
+def plotPosteriors(ps, objectName="", poseName=""):
+    xn, yn = ps[0].shape
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    title(objectName + " - " + poseName)
+    for posterior in ps:
+        ax.plot_wireframe(array([range(xn)] * yn).T,
+                          array([range(yn)] * xn),
+                          posterior)
+    xticks(range(N), objects)
+    yticks(range(I), poses)
+    show()
+
+
+# for oi in range(N):
+#     for pi in range(I):
+#         ps = []
+#         for ri in range(R):
+#             data = trainingErrors[oi, pi, :, ri]
+#             observe(data)
+#             ps.append(posteriors(1))
+#             print ps[0]
+#             wait()
+#             clearHistory()
+#         plotPosteriors(ps, objects[oi], poses[pi])

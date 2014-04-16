@@ -14,6 +14,7 @@
 #
 
 from pylab import *
+from mpl_toolkits.mplot3d import Axes3D
 
 from utils import *
 import pprint
@@ -95,20 +96,6 @@ def importData():
 
     pprint.pprint(poses)
     # ['down', 'down-spine', 'up-spine', 'up']
-
-    # plot
-    if False:
-        print "plotting training for one object-pose"
-
-        objectPose = np.array(trainingData['first_home_book']['down'])
-        cm = get_cmap('gist_rainbow')
-
-        x = np.linspace(0, 500, 1000)
-        for i in range(len(objectPose)):
-            color = cm(1. * i / len(objectPose))
-            t = objectPose[i]
-            plt.plot(x, normpdf(x, mean(t), sqrt(var(t))))
-        plt.show()
 
     global N, I, J, K, M, R, errors
     N = len(objects)
@@ -281,73 +268,92 @@ def train():
                 _ = dfgop(n, i, m)
 
 
+def plotTraining(idxObject, idxPose):
+    print "plotting training for " + objects[idxObject] + " - " + poses[idxPose]
+    cm = get_cmap('gist_rainbow')
+    x = np.linspace(0, 600, 1000)
+    for idxFeature in range(M):
+        color = cm(1. * idxFeature / M)
+        dist = dfgop(idxObject, idxPose, idxFeature)
+        title(objects[idxObject] + " - " + poses[idxPose])
+        plot(x, dist.pdf(x))
+    show()
+
+
 @memorize
-def posterior_op(idxObservation, idxObject, idxPose):
+def logPosterior_op(idxObservation, idxObject, idxPose):
     if (idxObservation == 0):
         return 1. / K
     elif (idxObservation == 1):
-        prior = posterior_op(idxObservation - 1,
-                             idxObject,
-                             idxPose)
-        thisLikelihood = likelihood(idxObservation,
-                                    idxObject,
-                                    idxPose)
-        thisEvidence = evidence(idxObservation)
-        print prior
-        print thisLikelihood
-        print thisEvidence
-        wait()
-        return prior * thisLikelihood / thisEvidence
+        logPrior = logPosterior_op(idxObservation - 1,
+                                   idxObject,
+                                   idxPose)
+        thisLogLikelihood = logLikelihood(idxObservation,
+                                          idxObject,
+                                          idxPose)
+        thisLogEvidence = logEvidence(idxObservation)
+        # print prior
+        # print thisLogLikelihood
+        # print thisLogEvidence
+        # wait()
+        return logPrior + thisLogLikelihood - thisLogEvidence
     else:
         previousAction = actionHistory[idxObservation - 1]
         previousActionIdx = action2idx(previousAction)
         previousPoseIdx = prevPoseIdx(idxPose,
                                       previousActionIdx)
-        lastPosterior = posterior_op(idxObservation - 1,
-                                     idxObject,
-                                     previousPoseIdx)
-        thisLikelihood = likelihood(idxObservation,
-                                    idxObject,
-                                    idxPose)
-        thisEvidence = evidence(idxObservation)
-        return lastPosterior * thisLikelihood / thisEvidence
+        lastPosterior = logPosterior_op(idxObservation - 1,
+                                        idxObject,
+                                        previousPoseIdx)
+        thisLogLikelihood = logLikelihood(idxObservation,
+                                          idxObject,
+                                          idxPose)
+        thisLogEvidence = logEvidence(idxObservation)
+        return logPrior + thisLogLikelihood - thisLogEvidence
 
 
 @memorize
-def likelihood(idxObservation, idxObject, idxPose):
+def logLikelihood(idxObservation, idxObject, idxPose):
     observation = observationHistory[idxObservation]
     if len(observation) != M:
         raise ex(
             "ERROR: Observation length != number of features in the model")
     # PARALLELIZE
     # independent features assumption leads to a product of their probabilities
-    accumulate = 1
+    accumulate = 0
     for idxFeature in range(M):
-        pdf = dfgop(idxObject,
-                    idxPose,
-                    idxFeature).pdf(observation[idxFeature])
-        accumulate = accumulate * pdf
-        print accumulate
+        logpdf = dfgop(idxObject,
+                       idxPose,
+                       idxFeature).logpdf(observation[idxFeature])
+        accumulate = accumulate + logpdf
     return accumulate
 
 
+def logOfSumGivenLogs(aLogs):
+    logC = max(aLogs)
+    return log(sum([exp(logA - logC) for logA in aLogs])) + logC
+
+
 @memorize
-def evidence(idxObservation):
-    accumulate = 0
+def logEvidence(idxObservation):
+    # The Trick:
+    # log (a+ b) = log (a/c + b/c) + log c
+    # c = max(a, b)
+
+    logTerms = []
     if (idxObservation == 1):
         # PARALLELIZE
         for idxObject in range(N):
             # sum over objects
             for idxPose in range(I):
-                thisLikelihood = likelihood(idxObservation,
-                                            idxObject,
-                                            idxPose)
-                accumulate = accumulate + thisLikelihood
+                thisLogLikelihood = logLikelihood(idxObservation,
+                                                  idxObject,
+                                                  idxPose)
+                logPrior = logPosterior_op(idxObservation - 1,
+                                           idxObject,
+                                           idxPose)
 
-        prior = posterior_op(idxObservation - 1,
-                             idxObject,
-                             idxPose)
-        accumulate = accumulate * prior
+                logTerms.append(thisLogLikelihood + logPrior)
     else:
         # PARALLELIZE
         for idxObject in range(N):
@@ -358,14 +364,30 @@ def evidence(idxObservation):
                 previousActionIdx = action2idx(previousAction)
                 previousPoseIdx = prevPoseIdx(idxPose,
                                               previousActionIdx)
-                lastPosterior = posterior_op(idxObservation - 1,
-                                             idxObject,
-                                             previousPoseIdx)
-                thisLikelihood = likelihood(idxObservation,
-                                            idxObject,
-                                            idxPose)
-                accumulate = accumulate + lastPosterior * thisLikelihood
-    return accumulate
+                logLastPosterior = logPosterior_op(idxObservation - 1,
+                                                   idxObject,
+                                                   previousPoseIdx)
+                thisLogLikelihood = logLikelihood(idxObservation,
+                                                  idxObject,
+                                                  idxPose)
+                logTerms.append(thisLogLikelihood + logPrior)
+
+    return logOfSumGivenLogs(logTerms)
+
+
+@memorize
+def posterior_op(idxObservation, idxObject, idxPose):
+    return exp(logPosterior_op(idxObservation, idxObject, idxPose))
+
+
+@memorize
+def likelihood(idxObservation, idxObject, idxPose):
+    return exp(logLikelihood(idxObservation, idxObject, idxPose))
+
+
+@memorize
+def evidence(idxObservation):
+    return exp(logEvidence(idxObservation))
 
 
 def observe(F):
@@ -390,13 +412,21 @@ def plotPosterior(idxObservation):
                        for n in range(N)])
 
     xn, yn = posteriors.shape
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    title("Observation: " + str(idxObservation))
     ax.plot_wireframe(
         array([range(xn)] * yn).T, array([range(yn)] * xn), posteriors)
+    xticks(range(N), objects)
+    yticks(range(I), poses)
     show()
-    wait()
 
 importData()
 train()
+
+# plotTraining(0, 0)
+
 
 #
 # Test with a training sample
@@ -408,3 +438,4 @@ r = 0
 
 data = errors[oi, pi, :, r]
 observe(data)
+plotPosterior(1)

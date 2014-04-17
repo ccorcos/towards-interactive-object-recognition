@@ -35,7 +35,7 @@ objects = []
 poses = []
 trainingData = {}
 trainingErrors = []
-N = I = J = K = M = R = 0
+N = I = J = K = M = R = rCrossVal = 0
 
 # FIX: Hard coded actions
 actions = ['stay', 'rotate', 'flip', 'flip-rotate']
@@ -68,7 +68,7 @@ def importData():
     pgm struture with objects and poses arrays"""
     global objects, poses, trainingData
     print "importing sift feature data"
-    f = open("MODEL_SIFT_STANDARD.txt", 'r')
+    f = open("MODEL_SIFT_STANDARD2.txt", 'r')
     string = f.read()
     string = string.replace(' ', '').replace(',\n', '\n')
     lines = string.split('\n')[:-1]
@@ -102,31 +102,38 @@ def importData():
         else:
             trainingData[o][p].append([float(i) for i in line])
 
-    pprint.pprint(objects)
-    # ['first_home_book',
-    #  'first_home_sticker_book',
-    #  'math_principles_book',
-    #  'math_principles_sticker_book']
-
-    pprint.pprint(poses)
-    # ['down', 'down-spine', 'up-spine', 'up']
-
-    global N, I, J, K, M, R, trainingErrors
+    global N, I, J, K, M, R, rCrossVal, trainingErrors, crossValErrors
     N = len(objects)
     I = len(poses)
     J = len(actions)
 
-    trainingErrors = []
+    errors = []
     for n in range(N):
         obj = objects[n]
-        trainingErrors.append([])
+        errors.append([])
         for i in range(I):
             pose = poses[i]
-            trainingErrors[n].append(trainingData[obj][pose])
-    trainingErrors = array(trainingErrors)
+            errors[n].append(trainingData[obj][pose])
+    errors = array(errors)
+    _, _, M, rErrors = errors.shape
+
+    # cross validation
+    rCrossVal = int(round(0.2 * rErrors))
+    crossValErrors = errors[:, :,:, :rCrossVal]
+
+    trainingErrors = errors[:, :,:, rCrossVal:]
     _, _, M, R = trainingErrors.shape
 
     K = N * I
+
+    print "import complete:"
+    print str(N) + " objects: "
+    pprint.pprint(objects)
+    print str(I) + " poses: "
+    pprint.pprint(poses)
+    print str(M) + " features"
+    print str(R) + " training samples"
+    print str(rCrossVal) + " cross validation samples"
 
 
 @memoize
@@ -451,8 +458,9 @@ def plotPosteriors(ps, objectName="", poseName=""):
     for i in range(len(ps)):
         posterior = ps[i]
         color = cm(1. * i / len(ps))
-        ax.plot_wireframe(array([range(xn)] * yn).T,
-                          array([range(yn)] * xn),
+        # shift a little bit do you can see how many there are
+        ax.plot_wireframe(array([range(xn)] * yn).T + 0.01 * i,
+                          array([range(yn)] * xn) + 0.01 * i,
                           posterior,
                           color=color)
     xticks(range(N), objects)
@@ -460,21 +468,35 @@ def plotPosteriors(ps, objectName="", poseName=""):
     show()
 
 
+def plotTrainingPosteriors():
+    for n in range(N):
+        for i in range(I):
+            ps = []
+            for r in range(R):
+                print "object: " + str(n) + ", pose: " + str(i) + ", sample: " + str(r)
+                data = trainingErrors[n, i, :, r]
+                observe(data)
+                ps.append(posteriors(1))
+                clearHistory()
+            plotPosteriors(ps, objects[n], poses[i])
+            wait()
+
+
+def plotCrossValPosteriors():
+    for n in range(N):
+        for i in range(I):
+            ps = []
+            for r in range(rCrossVal):
+                print "object: " + str(n) + ", pose: " + str(i) + ", sample: " + str(r)
+                data = crossValErrors[n, i, :, r]
+                observe(data)
+                ps.append(posteriors(1))
+                clearHistory()
+            plotPosteriors(ps, objects[n], poses[i])
+            wait()
+
 importData()
 train()
 # plotTraining(0, 0)
-
-#
-# Test with a training sample
-#
-
-for n in range(N):
-    for i in range(I):
-        ps = []
-        for r in range(R):
-            print "object: " + str(n) + ", pose: " + str(i) + ", sample: " + str(r)
-            data = trainingErrors[n, i, :, r]
-            observe(data)
-            ps.append(posteriors(1))
-            clearHistory()
-        plotPosteriors(ps, objects[n], poses[i])
+# plotTrainingPosteriors()
+plotCrossValPosteriors()

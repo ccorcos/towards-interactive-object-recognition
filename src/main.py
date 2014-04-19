@@ -340,7 +340,7 @@ def logPosterior_op(idxObservation, idxObject, idxPose):
                                           idxObject,
                                           idxPose)
         thisLogEvidence = logEvidence(idxObservation)
-        return logPrior + thisLogLikelihood - thisLogEvidence
+        return lastPosterior + thisLogLikelihood - thisLogEvidence
 
 
 @memoize
@@ -351,13 +351,13 @@ def logLikelihood(idxObservation, idxObject, idxPose):
             "ERROR: Observation length != number of features in the model")
     # PARALLELIZE
     # independent features assumption leads to a product of their probabilities
-    accumulate = 0
+    accumulate = []
     for idxFeature in range(M):
         logpdf = dfgop(idxObject,
                        idxPose,
                        idxFeature).logpdf(observation[idxFeature])
-        accumulate = accumulate + logpdf
-    return accumulate
+        accumulate.append(logpdf)
+    return logOfSumGivenLogs(accumulate)
 
 
 def logOfSumGivenLogs(aLogs):
@@ -505,17 +505,21 @@ def plotCrossValPosteriors():
             plotPosteriors(ps, objects[n], poses[i])
             wait()
 
+
+def plotTestFirstPosteriors():
+    test = importTest()
+    test1 = test[:, 0]
+    test2 = test[:, 1]
+    observe(test1)
+    plotPosterior(1)
+    clearHistory()
+    observe(test2)
+    plotPosterior(1)
+
+
 importData()
 train()
 # plotTraining(0, 0)
 # plotTrainingPosteriors()
-# plotCrossValPosteriors()
-
-test = importTest()
-test1 = test[:, 0]
-test2 = test[:, 1]
-observe(test1)
-plotPosterior(1)
-clearHistory()
-observe(test2)
-plotPosterior(1)
+plotCrossValPosteriors()
+plotTestFirstPosteriors()

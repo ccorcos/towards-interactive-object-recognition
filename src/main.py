@@ -63,6 +63,16 @@ def whichObservationIdx():
     return len(observationHistory) - 1
 
 
+def importTest():
+    print "importing test feature data"
+    f = open("real_exp.txt", 'r')
+    string = f.read()
+    data = [s.split('\t')
+                    for s in string.split('\n')[:-2]]  # array[feature][sample]
+    data = array([[float(s) for s in a] for a in data])
+    return data
+
+
 def importData():
     """Imports SIFT feature errors to training data. Also builds the
     pgm struture with objects and poses arrays"""
@@ -499,4 +509,13 @@ importData()
 train()
 # plotTraining(0, 0)
 # plotTrainingPosteriors()
-plotCrossValPosteriors()
+# plotCrossValPosteriors()
+
+test = importTest()
+test1 = test[:, 0]
+test2 = test[:, 1]
+observe(test1)
+plotPosterior(1)
+clearHistory()
+observe(test2)
+plotPosterior(1)

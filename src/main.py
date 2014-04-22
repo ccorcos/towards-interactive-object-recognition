@@ -513,13 +513,13 @@ importData()
 train()
 # plotTraining(0, 0)
 # plotTrainingPosteriors()
-# plotCrossValPosteriors()
+plotCrossValPosteriors()
 
-test = importTest()
-test1 = test[:, 0]
-test2 = test[:, 1]
-observe(test1)
-plotPosterior(1)
-clearHistory()
-observe(test2)
-plotPosterior(1)
+# test = importTest()
+# test1 = test[:, 0]
+# test2 = test[:, 1]
+# observe(test1)
+# plotPosterior(1)
+# clearHistory()
+# observe(test2)
+# plotPosterior(1)

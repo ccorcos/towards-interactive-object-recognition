@@ -758,3 +758,7 @@ for idxAction in range(J):
     expectedEntropies.append(entropy_expected_posterior_o(2, idxAction))
 
 print actions[expectedEntropies.index(min(expectedEntropies))]
+
+
+# this is wrong right now. I need to make sure to sample for each specific
+# action.

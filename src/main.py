@@ -357,6 +357,7 @@ def logLikelihood(idxObservation, idxObject, idxPose):
                        idxPose,
                        idxFeature).logpdf(observation[idxFeature])
         accumulate.append(logpdf)
+    # return the sum rather than the product
     return logOfSumGivenLogs(accumulate)
 
 

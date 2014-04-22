@@ -129,9 +129,9 @@ def importData():
 
     # cross validation
     rCrossVal = int(round(0.2 * rErrors))
-    crossValErrors = errors[:, :,:, :rCrossVal]
+    crossValErrors = errors[:,:,:, :rCrossVal]
 
-    trainingErrors = errors[:, :,:, rCrossVal:]
+    trainingErrors = errors[:,:,:, rCrossVal:]
     _, _, M, R = trainingErrors.shape
 
     K = N * I
@@ -290,7 +290,7 @@ class Distribution1D:
 @memoize
 def dfgop(idxObject, idxPose, idxFeature):
     # likelihood distribution
-    return Distribution1D(trainingErrors[idxObject, idxPose, idxFeature, :])
+    return Distribution1D(trainingErrors[idxObject, idxPose, idxFeature,:])
 
 
 def train():
@@ -490,7 +490,7 @@ def plotTrainingPosteriors():
             ps = []
             for r in range(R):
                 print "object: " + str(n) + ", pose: " + str(i) + ", sample: " + str(r)
-                data = trainingErrors[n, i, :, r]
+                data = trainingErrors[n, i,:, r]
                 observe(data)
                 ps.append(posteriors(1))
                 clearHistory()
@@ -504,7 +504,7 @@ def plotCrossValPosteriors():
             ps = []
             for r in range(rCrossVal):
                 print "object: " + str(n) + ", pose: " + str(i) + ", sample: " + str(r)
-                data = crossValErrors[n, i, :, r]
+                data = crossValErrors[n, i,:, r]
                 observe(data)
                 ps.append(posteriors(1))
                 clearHistory()
@@ -524,16 +524,17 @@ def plotTestFirstPosteriors():
 
 
 @memoize
-def sampleEvidenceDistribution(idxObservation):
+def sampleEvidenceDistribution(idxObservation, idxAction):
+    print "generating particles for obs: ", idxObservation, " action: ", idxAction
     # idxObservation = the next observation that hasnt happened yet
     # samples what is expected to see for the next observation
 
+    # first sample object poses from the last posteior
+    # then sample the observations
     # get the posteriors
     lastPs = posteriors(idxObservation - 1)  # [object][pose]
     # flatten for sampling
     flatps = lastPs.reshape(K)
-    # number of particles
-    nParticles = 10 * K
     # sample a uniform distribution
     numbers = uniform(0, 1, nParticles)
     # flatten and sample the discrete posterior distribution
@@ -549,8 +550,12 @@ def sampleEvidenceDistribution(idxObservation):
         objPoseIdx = particleObjPoseIdx[:, i]
         idxObject = objPoseIdx[0]
         idxPose = objPoseIdx[1]
+
+        # convert pose based on action
+        nextIdxPost = nextPoseIdx(idxPose, idxAction)
+
         for idxFeature in range(M):
-            fsample = dfgop(idxObject, idxPose, idxFeature).sample()
+            fsample = dfgop(idxObject, nextIdxPost, idxFeature).sample()
             Fsample.append(fsample)
         particles.append(Fsample)
     return array(particles)
@@ -571,7 +576,8 @@ def particle_logPosterior_op(idxObservation, idxObject, idxPose, idxParticle, pr
         thisLogLikelihood = particle_logLikelihood(idxObservation,
                                                    idxObject,
                                                    idxPose,
-                                                   idxParticle)
+                                                   idxParticle,
+                                                   previousActionIdx)
         thisLogEvidence = particle_logEvidence(
             idxObservation, idxParticle, previousActionIdx)
         # print prior
@@ -588,14 +594,16 @@ def particle_logPosterior_op(idxObservation, idxObject, idxPose, idxParticle, pr
         thisLogLikelihood = particle_logLikelihood(idxObservation,
                                                    idxObject,
                                                    idxPose,
-                                                   idxParticle)
+                                                   idxParticle,
+                                                   previousActionIdx)
         thisLogEvidence = particle_logEvidence(
             idxObservation, idxParticle, previousActionIdx)
         return lastPosterior + thisLogLikelihood - thisLogEvidence
 
 
 @memoize
-def particle_logLikelihood(idxObservation, idxObject, idxPose, idxParticle):
+def particle_logLikelihood(idxObservation, idxObject, idxPose, idxParticle, idxAction):
+    particles = sampleEvidenceDistribution(idxObservation, idxAction)
     observation = particles[idxParticle]
     if len(observation) != M:
         raise ex(
@@ -637,7 +645,8 @@ def particle_logEvidence(idxObservation, idxParticle, previousActionIdx):
                 thisLogLikelihood = particle_logLikelihood(idxObservation,
                                                            idxObject,
                                                            idxPose,
-                                                           idxParticle)
+                                                           idxParticle,
+                                                           previousActionIdx)
 
                 logTerms.append(thisLogLikelihood + logPrior)
     else:
@@ -654,7 +663,8 @@ def particle_logEvidence(idxObservation, idxParticle, previousActionIdx):
                 thisLogLikelihood = particle_logLikelihood(idxObservation,
                                                            idxObject,
                                                            idxPose,
-                                                           idxParticle)
+                                                           idxParticle,
+                                                           previousActionIdx)
                 logTerms.append(thisLogLikelihood + logLastPosterior)
 
     return logOfSumGivenLogs(logTerms)
@@ -666,8 +676,8 @@ def particle_posterior_op(idxObservation, idxObject, idxPose, idxParticle, idxAc
 
 
 @memoize
-def particle_likelihood(idxObservation, idxObject, idxPose, idxParticle):
-    return exp(particle_logLikelihood(idxObservation, idxObject, idxPose, idxParticle))
+def particle_likelihood(idxObservation, idxObject, idxPose, idxParticle, idxAction):
+    return exp(particle_logLikelihood(idxObservation, idxObject, idxPose, idxParticle, idxAction))
 
 
 @memoize
@@ -747,10 +757,12 @@ test = importTest()
 test1 = test[:, 1]
 observe(test1)
 # plotPosterior(1)
-print "generating particles"
-particles = sampleEvidenceDistribution(2)
-nParticles = particles.shape[0]
-
+# print "generating particles"
+# particles = sampleEvidenceDistribution(2, 0)
+#
+# we end up sampleing 10*N*I = 160 particles for each of J actions = 640
+# of M features
+nParticles = 10 * K
 
 # particle_posteriors_op(2, 0, 0)
 expectedEntropies = []
@@ -758,7 +770,6 @@ for idxAction in range(J):
     expectedEntropies.append(entropy_expected_posterior_o(2, idxAction))
 
 print actions[expectedEntropies.index(min(expectedEntropies))]
-
 
 # this is wrong right now. I need to make sure to sample for each specific
 # action.

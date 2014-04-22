@@ -281,7 +281,11 @@ class Distribution1D:
         return normpdf(values, self.mu, self.sigma)
 
     def logpdf(self, value):
-        return -log(self.sigma * sqrt(2 * pi)) - (value - self.mu) ** 2 / (2 * self.sigma ** 2)
+        # set a minimum
+        minlogpdf = log(0.05)
+        logpdf = -log(self.sigma * sqrt(2 * pi)) - \
+                      (value - self.mu) ** 2 / (2 * self.sigma ** 2)
+        return max(minlogpdf, logpdf)
 
 
 @memoize

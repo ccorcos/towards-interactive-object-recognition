@@ -68,7 +68,7 @@ def importTest():
     f = open("real_exp.txt", 'r')
     string = f.read()
     data = [s.split('\t')
-                    for s in string.split('\n')[:-2]]  # array[feature][sample]
+            for s in string.split('\n')[:-2]]  # array[feature][sample]
     data = array([[float(s) for s in a] for a in data])
     return data
 
@@ -129,9 +129,9 @@ def importData():
 
     # cross validation
     rCrossVal = int(round(0.2 * rErrors))
-    crossValErrors = errors[:,:,:, :rCrossVal]
+    crossValErrors = errors[:, :,:, :rCrossVal]
 
-    trainingErrors = errors[:,:,:, rCrossVal:]
+    trainingErrors = errors[:, :,:, rCrossVal:]
     _, _, M, R = trainingErrors.shape
 
     K = N * I
@@ -241,12 +241,12 @@ def prevPose(pose, action):
 
 @memoize
 def nextPoseIdx(poseIdx, actionIdx):
-    return pose.index(nextPose(poses[poseIdx], actions[actionIdx]))
+    return poses.index(nextPose(poses[poseIdx], actions[actionIdx]))
 
 
 @memoize
 def prevPoseIdx(poseIdx, actionIdx):
-    return pose.index(prevPose(poses[poseIdx], actions[actionIdx]))
+    return poses.index(prevPose(poses[poseIdx], actions[actionIdx]))
 
 
 @memoize
@@ -290,7 +290,7 @@ class Distribution1D:
 @memoize
 def dfgop(idxObject, idxPose, idxFeature):
     # likelihood distribution
-    return Distribution1D(trainingErrors[idxObject, idxPose, idxFeature,:])
+    return Distribution1D(trainingErrors[idxObject, idxPose, idxFeature, :])
 
 
 def train():
@@ -405,7 +405,7 @@ def logEvidence(idxObservation):
                 thisLogLikelihood = logLikelihood(idxObservation,
                                                   idxObject,
                                                   idxPose)
-                logTerms.append(thisLogLikelihood + logPrior)
+                logTerms.append(thisLogLikelihood + logLastPosterior)
 
     return logOfSumGivenLogs(logTerms)
 
@@ -427,6 +427,7 @@ def evidence(idxObservation):
 
 def observe(F):
     """This method gets invokes upon observing data"""
+    print "making an observation"
     global observationHistory
     observationHistory.append(F)
     idxObservation = whichObservationIdx()
@@ -489,7 +490,7 @@ def plotTrainingPosteriors():
             ps = []
             for r in range(R):
                 print "object: " + str(n) + ", pose: " + str(i) + ", sample: " + str(r)
-                data = trainingErrors[n, i,:, r]
+                data = trainingErrors[n, i, :, r]
                 observe(data)
                 ps.append(posteriors(1))
                 clearHistory()
@@ -503,7 +504,7 @@ def plotCrossValPosteriors():
             ps = []
             for r in range(rCrossVal):
                 print "object: " + str(n) + ", pose: " + str(i) + ", sample: " + str(r)
-                data = crossValErrors[n, i,:, r]
+                data = crossValErrors[n, i, :, r]
                 observe(data)
                 ps.append(posteriors(1))
                 clearHistory()
@@ -555,43 +556,6 @@ def sampleEvidenceDistribution(idxObservation):
     return array(particles)
 
 
-importData()
-train()
-# plotTraining(0, 0)
-# plotTrainingPosteriors()
-# plotCrossValPosteriors()
-# plotTestFirstPosteriors()
-
-# lets get going on actions
-test = importTest()
-test1 = test[:, 0]
-observe(test1)
-plotPosterior(1)
-particles = sampleEvidenceDistribution(2)
-nParticles = particles.shape[0]
-
-# sample evidence:
-# get each of the last posterior,  ex = [0.1, 0.9]
-# sample 100 from the posteriors,  ex = [0,1,1,1,1,1,1,1,1,1,1]
-#   for each sample, subsample the likelihood distribution
-#       each dfgop, sample
-# for each particle, compute next posterior
-# sum over pose, take mean (expectation)
-
-
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-
 @memoize
 def particle_logPosterior_op(idxObservation, idxObject, idxPose, idxParticle, previousActionIdx):
     # idxObservation hasnt been observed yet. we are representing its distribution with
@@ -605,10 +569,11 @@ def particle_logPosterior_op(idxObservation, idxObject, idxPose, idxParticle, pr
                                    idxObject,
                                    idxPose)
         thisLogLikelihood = particle_logLikelihood(idxObservation,
-                                          idxObject,
-                                          idxPose,
-                                          idxParticle)
-        thisLogEvidence = particle_logEvidence(idxObservation, idxParticle)
+                                                   idxObject,
+                                                   idxPose,
+                                                   idxParticle)
+        thisLogEvidence = particle_logEvidence(
+            idxObservation, idxParticle, previousActionIdx)
         # print prior
         # print thisLogLikelihood
         # print thisLogEvidence
@@ -621,10 +586,11 @@ def particle_logPosterior_op(idxObservation, idxObject, idxPose, idxParticle, pr
                                         idxObject,
                                         previousPoseIdx)
         thisLogLikelihood = particle_logLikelihood(idxObservation,
-                                          idxObject,
-                                          idxPose,
-                                          idxParticle)
-        thisLogEvidence = particle_logEvidence(idxObservation, idxParticle)
+                                                   idxObject,
+                                                   idxPose,
+                                                   idxParticle)
+        thisLogEvidence = particle_logEvidence(
+            idxObservation, idxParticle, previousActionIdx)
         return lastPosterior + thisLogLikelihood - thisLogEvidence
 
 
@@ -652,13 +618,14 @@ def logOfSumGivenLogs(aLogs):
 
 
 @memoize
-def particle_logEvidence(idxObservation, idxParticle):
+def particle_logEvidence(idxObservation, idxParticle, previousActionIdx):
     # The Trick:
     # log (a+ b) = log (a/c + b/c) + log c
     # c = max(a, b)
 
     logTerms = []
     if (idxObservation == 1):
+        print "WARNING: No reason to be calculating this"
         # PARALLELIZE
         for idxObject in range(N):
             # sum over objects
@@ -668,9 +635,9 @@ def particle_logEvidence(idxObservation, idxParticle):
                                            idxPose)
 
                 thisLogLikelihood = particle_logLikelihood(idxObservation,
-                                                  idxObject,
-                                                  idxPose,
-                                                  idxParticle)
+                                                           idxObject,
+                                                           idxPose,
+                                                           idxParticle)
 
                 logTerms.append(thisLogLikelihood + logPrior)
     else:
@@ -679,18 +646,16 @@ def particle_logEvidence(idxObservation, idxParticle):
             # sum over objects
             for idxPose in range(I):
                 # sum over poses
-                previousAction = actionHistory[idxObservation - 1]
-                previousActionIdx = action2idx(previousAction)
                 previousPoseIdx = prevPoseIdx(idxPose,
                                               previousActionIdx)
                 logLastPosterior = logPosterior_op(idxObservation - 1,
                                                    idxObject,
                                                    previousPoseIdx)
                 thisLogLikelihood = particle_logLikelihood(idxObservation,
-                                                  idxObject,
-                                                  idxPose,
-                                                  idxParticle)
-                logTerms.append(thisLogLikelihood + logPrior)
+                                                           idxObject,
+                                                           idxPose,
+                                                           idxParticle)
+                logTerms.append(thisLogLikelihood + logLastPosterior)
 
     return logOfSumGivenLogs(logTerms)
 
@@ -706,16 +671,67 @@ def particle_likelihood(idxObservation, idxObject, idxPose, idxParticle):
 
 
 @memoize
-def particle_evidence(idxObservation, idxParticle):
-    return exp(particle_logEvidence(idxObservation, idxParticle))
+def particle_evidence(idxObservation, idxParticle, idxAction):
+    return exp(particle_logEvidence(idxObservation, idxParticle, idxAction))
 
 
-# @memoize
-# def particle_posteriors(idxObservation, idxParticle):
-#     return array([[particle_posterior_op(idxObservation, n, i, idxParticle)
-#                    for i in range(I)]
-#                   for n in range(N)])
+@memoize
+def particle_posteriors_op(idxObservation, idxParticle, idxAction):
+    return array([[particle_posterior_op(idxObservation, n, i, idxParticle, idxAction)
+                   for i in range(I)]
+                  for n in range(N)])
 
+
+@memoize
+def particle_posteriors_o(idxObservation, idxParticle, idxAction):
+    return sum(particle_posteriors_op(idxObservation, idxParticle, idxAction), 1)
+
+
+@memoize
+def expected_posterior_op(idxObservation, idxAction):
+    particle_posteriors = []
+    for idxParticle in range(nParticles):
+        particle_posteriors.append(
+            particle_posteriors_op(idxObservation, idxParticle, idxAction))
+    return mean(particle_posteriors, 0)
+
+
+@memoize
+def expected_posterior_o(idxObservation, idxAction):
+    particle_posteriors = []
+    for idxParticle in range(nParticles):
+        particle_posteriors.append(
+            particle_posteriors_o(idxObservation, idxParticle, idxAction))
+    return mean(particle_posteriors, 0)
+
+
+def entropy(arr):
+    return -sum(arr * log(arr))
+
+
+@memoize
+def entropy_expected_posterior_o(idxObservation, idxAction):
+    return entropy(expected_posterior_o(idxObservation, idxAction))
+
+
+importData()
+train()
+# plotTrainingPosteriors()
+# plotCrossValPosteriors()
+# plotTestFirstPosteriors()
+
+
+# lets get going on actions
+#
+# sample evidence:
+# get each of the last posterior,  ex = [0.1, 0.9]
+# sample 100 from the posteriors,  ex = [0,1,1,1,1,1,1,1,1,1,1]
+#   for each sample, subsample the likelihood distribution
+#       each dfgop, sample
+# for each particle, compute next posterior
+# sum over pose, take mean (expectation)
+#
+#
 # for each action
 #     for each particle
 #       compute the posterior
@@ -724,3 +740,21 @@ def particle_evidence(idxObservation, idxParticle):
 # determine the best action
 # plot current posterior
 # plot expected next posterior for best action
+#
+
+
+test = importTest()
+test1 = test[:, 1]
+observe(test1)
+# plotPosterior(1)
+print "generating particles"
+particles = sampleEvidenceDistribution(2)
+nParticles = particles.shape[0]
+
+
+# particle_posteriors_op(2, 0, 0)
+expectedEntropies = []
+for idxAction in range(J):
+    expectedEntropies.append(entropy_expected_posterior_o(2, idxAction))
+
+print actions[expectedEntropies.index(min(expectedEntropies))]

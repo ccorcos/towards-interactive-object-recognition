@@ -267,6 +267,10 @@ def action2idx(action):
 #
 # TRAIN
 #
+uniformMaxMean = 157
+maxValue = 557
+
+
 class Distribution1D:
 
     """1D Gaussian Distribution"""
@@ -278,14 +282,36 @@ class Distribution1D:
         self.sigma = sqrt(var(values))
 
     def pdf(self, values):
-        return normpdf(values, self.mu, self.sigma)
+        if self.mu > uniformMaxMean:
+            if type(values) == type([]) or type(values) == type(array([])):
+                a = []
+                for i in values:
+                    if i > uniformMaxMean:
+                        a.append(1. / (maxValue - uniformMaxMean))
+                    else:
+                        a.append(0)
+                return array(a)
+            else:
+                return 1. / (maxValue - uniformMaxMean)
+        else:
+            return normpdf(values, self.mu, self.sigma)
 
     def logpdf(self, value):
-        # set a minimum
-        minlogpdf = log(0.05)
-        logpdf = -log(self.sigma * sqrt(2 * pi)) - \
+        if self.mu > uniformMaxMean:
+            # print value
+            if type(value) == type([]) or type(value) == type(array([])):
+                a = []
+                for i in values:
+                    if i > uniformMaxMean:
+                        a.append(1. / (maxValue - uniformMaxMean))
+                    else:
+                        a.append(0)
+                return array(a)
+            else:
+                return 1. / (maxValue - uniformMaxMean)
+        else:
+            return -log(self.sigma * sqrt(2 * pi)) - \
                       (value - self.mu) ** 2 / (2 * self.sigma ** 2)
-        return max(minlogpdf, logpdf)
 
 
 @memoize
@@ -511,7 +537,7 @@ def plotCrossValPosteriors():
 
 importData()
 train()
-# plotTraining(0, 0)
+plotTraining(0, 0)
 # plotTrainingPosteriors()
 plotCrossValPosteriors()
 

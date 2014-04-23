@@ -1,2 +1,12 @@
 search for FIX comments to find things to fix
 search for PARALLELIZE for places to do parallel loops
+
+
+with N objects and I poses with R for each object-pose and M features
+
+this creates M*N*I guassians. 
+to prevent overfitting, lets have V samples per gaussian
+
+this the number of features we can keep is
+M*N*I/R = V
+M = V*R/N/I

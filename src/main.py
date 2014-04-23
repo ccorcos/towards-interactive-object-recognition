@@ -179,6 +179,10 @@ def importTrainingData(fileName, xValPercent):
     N = len(objects)  # number of objects
     I = len(poses)  # number of poses
     J = len(actions)  # number of actions
+    K = N * I # number of object-poses
+
+    # save the feature indexes so we know which ones when importing test data
+    Vidx = []
 
     # get all of the errors into a list
     # errors.shape will be (N, I, M, R + Rx)
@@ -188,12 +192,24 @@ def importTrainingData(fileName, xValPercent):
         errors.append([])
         for i in range(I):
             pose = poses[i]
-            errors[n].append(trainingData[obj][pose])
+            # determine the V best features per object-pose
+            objPoseErrors = array(trainingData[obj][pose])
+            meanObjPoseErrors = mean(objPoseErrors,1)
+            sortErrIdx = sorted(range(len(meanObjPoseErrors)), key=lambda k: meanObjPoseErrors[k])
+            idx = sortErrIdx[0:V]
+            Vidx = Vidx + idx
+            errors[n].append(objPoseErrors)
     errors = array(errors)
+    # get rid of any redudance
+    Vidx = list(set(Vidx))
+    # filter out only the v best
+    errors = errors[:,:,Vidx,:]
+
     # M: number of features
     # Re: number of samples
     _, _, M, Re = errors.shape
 
+    # FIX: random!
     # split the samples into training and cross-validation
     Rx = int(round(xValPercent * Re))
     crossValErrors = errors[:, :,:, :Rx]
@@ -201,15 +217,14 @@ def importTrainingData(fileName, xValPercent):
     trainingErrors = errors[:, :,:, Rx:]
     _, _, _, R = trainingErrors.shape
 
-    # K: number of object-poses
-    K = N * I
 
     pr(1, "finished import")
     pr(2, "N objects:", N)
     pr(3, objects)
     pr(2, "I poses:", I)
     pr(3, poses)
-    pr(2, "M features:", M)
+    pr(2, "V best features per object-pose:",V)
+    pr(2, "M features used:",M)
     pr(2, "Re samples:", Re)
     pr(2, "R for training:", R)
     pr(2, "Rx for cross-val:", Rx)
@@ -244,6 +259,8 @@ def importTestData(fileName):
     data = [s.split('\t') for s in lines]  # array[feature][sample]
     # convert string to float and list to array
     data = array([[float(s) for s in a] for a in data])
+    # get only the subsampled feature set
+    data = data[Vidx,:]
     return data
 
 
@@ -700,7 +717,7 @@ def plotCrossValPosteriors():
             wait()
 
 
-def plotTraining(idxObject, idxPose):
+def plotTrainingDistribution(idxObject, idxPose):
     """Plots the learned feature distributions for a 
     specific object-pose"""
 
@@ -716,6 +733,35 @@ def plotTraining(idxObject, idxPose):
     title("Training: " + objects[idxObject] + " - " + poses[idxPose])
     show()
 
+def plotTrainingDistributions(together=True):
+    if together:
+        pr(1, "plotting all training distributions together")
+
+        cm = get_cmap('gist_rainbow')
+        x = np.linspace(0, 600, 1000)
+        for n in range(N):
+            for i in range(I):
+                for idxFeature in range(M):
+                    color = cm(1. * (n+i) / K)
+                    dist = dfgop(n, i, idxFeature)
+                    plot(x, dist.pdf(x))
+        title("All Training Distributions")
+        show()
+    else:
+        for n in range(N):
+            for i in range(I):
+                plotTrainingDistribution(n,i)
+                wait()
+
+
+
+# to prevent overfitting, lets only use a subset of V < M samples
+# how to select which samples to use?
+# lets choose evenly from each object pose to prevent bias
+# why not choose the ones with the smallest error as well
+# V multiples of K
+
+V = 4
 
 trainingFile = "MODEL_SIFT_STANDARD2.txt"
 percentHoldOut = 0.2  # cross-validation
@@ -723,17 +769,20 @@ percentHoldOut = 0.2  # cross-validation
 importTrainingData(trainingFile, percentHoldOut)
 train()
 
-# plotTraining(0, 0)
+# plotTrainingDistribution(0, 0)
+# plotTrainingDistributions(together=False)
 # plotTrainingPosteriors()
-# plotCrossValPosteriors()
 
-testFile = "real_exp.txt"
+# plotTrainingDistributions()
+plotCrossValPosteriors()
 
-test = importTestData(testFile)
-test1 = test[:, 0]
-test2 = test[:, 1]
-observe(test1)
-plotPosteriors_op(1)
-clearHistory()
-observe(test2)
-plotPosteriors_op(1)
+# testFile = "real_exp.txt"
+
+# test = importTestData(testFile)
+# test1 = test[:, 0]
+# test2 = test[:, 1]
+# observe(test1)
+# plotPosteriors_op(1)
+# clearHistory()
+# observe(test2)
+# plotPosteriors_op(1)

@@ -194,9 +194,10 @@ def importTrainingData(fileName, xValPercent):
             pose = poses[i]
             errors[n].append(trainingData[obj][pose])
     errors = array(errors)
-    Vidx = []
-    # get rid of any redudance
-    Vidx = list(set(Vidx))
+    M = errors.shape[2]
+    Vidx = [randint(0,M) for i in range(V)]
+    Vidx = list(set(Vidx)) # get rid of redundance
+    M = V
     # filter out only the v best
     errors = errors[:,:,Vidx,:]
 
@@ -218,7 +219,6 @@ def importTrainingData(fileName, xValPercent):
     pr(3, objects)
     pr(2, "I poses:", I)
     pr(3, poses)
-    pr(2, "V best features per object-pose:",V)
     pr(2, "M features used:",M)
     pr(2, "Re samples:", Re)
     pr(2, "R for training:", R)
@@ -754,7 +754,7 @@ def plotTrainingDistributions(together=True):
 # how to select which samples to use?
 # lets randomly choose V
 
-V = 100
+V = 30
 
 trainingFile = "MODEL_SIFT_STANDARD2.txt"
 percentHoldOut = 0.2  # cross-validation

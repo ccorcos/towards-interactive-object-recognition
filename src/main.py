@@ -45,6 +45,7 @@ objects = []
 poses = []
 trainingErrors = []
 crossValErrors = []
+Vidx = []
 trainingData = {}
 N = 0
 I = 0
@@ -125,9 +126,11 @@ def importTrainingData(fileName, xValPercent):
         
         @global crossValErrors: array of cross-validation errors 
             [object][pose][feature][sample]
+
+        @global Vidx: indexes of subsampled features
     '''
 
-    global objects, poses, trainingData, N, I, J, K, M, Re, R, Rx, trainingErrors, crossValErrors
+    global objects, poses, trainingData, N, I, J, K, M, Re, R, Rx, trainingErrors, crossValErrors, Vidx
 
     pr(0, "importing feature errors from", fileName)
 

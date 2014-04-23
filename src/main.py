@@ -45,6 +45,7 @@ objects = []
 poses = []
 trainingErrors = []
 crossValErrors = []
+Vidx = []
 trainingData = {}
 N = 0
 I = 0
@@ -125,9 +126,11 @@ def importTrainingData(fileName, xValPercent):
         
         @global crossValErrors: array of cross-validation errors 
             [object][pose][feature][sample]
+
+        @global Vidx: index of subsampled features
     '''
 
-    global objects, poses, trainingData, N, I, J, K, M, Re, R, Rx, trainingErrors, crossValErrors
+    global objects, poses, trainingData, N, I, J, K, M, Re, R, Rx, trainingErrors, crossValErrors, Vidx
 
     pr(0, "importing feature errors from", fileName)
 
@@ -179,10 +182,7 @@ def importTrainingData(fileName, xValPercent):
     N = len(objects)  # number of objects
     I = len(poses)  # number of poses
     J = len(actions)  # number of actions
-    K = N * I # number of object-poses
-
-    # save the feature indexes so we know which ones when importing test data
-    Vidx = []
+    K = N * I # number of object-poses    
 
     # get all of the errors into a list
     # errors.shape will be (N, I, M, R + Rx)
@@ -192,14 +192,9 @@ def importTrainingData(fileName, xValPercent):
         errors.append([])
         for i in range(I):
             pose = poses[i]
-            # determine the V best features per object-pose
-            objPoseErrors = array(trainingData[obj][pose])
-            meanObjPoseErrors = mean(objPoseErrors,1)
-            sortErrIdx = sorted(range(len(meanObjPoseErrors)), key=lambda k: meanObjPoseErrors[k])
-            idx = sortErrIdx[0:V]
-            Vidx = Vidx + idx
-            errors[n].append(objPoseErrors)
+            errors[n].append(trainingData[obj][pose])
     errors = array(errors)
+    Vidx = []
     # get rid of any redudance
     Vidx = list(set(Vidx))
     # filter out only the v best
@@ -757,11 +752,9 @@ def plotTrainingDistributions(together=True):
 
 # to prevent overfitting, lets only use a subset of V < M samples
 # how to select which samples to use?
-# lets choose evenly from each object pose to prevent bias
-# why not choose the ones with the smallest error as well
-# V multiples of K
+# lets randomly choose V
 
-V = 4
+V = 100
 
 trainingFile = "MODEL_SIFT_STANDARD2.txt"
 percentHoldOut = 0.2  # cross-validation

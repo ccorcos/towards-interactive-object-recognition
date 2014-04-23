@@ -720,7 +720,7 @@ def plotCrossValPosteriors():
             wait()
 
 
-def plotTrainingDistribution(idxObject, idxPose):
+def plotObjPoseTrainingDistribution(idxObject, idxPose):
     """Plots the learned feature distributions for a 
     specific object-pose"""
 
@@ -731,12 +731,11 @@ def plotTrainingDistribution(idxObject, idxPose):
     for idxFeature in range(M):
         color = cm(1. * idxFeature / M)
         dist = dfgop(idxObject, idxPose, idxFeature)
-        title(objects[idxObject] + " - " + poses[idxPose])
         plot(x, dist.pdf(x))
     title("Training: " + objects[idxObject] + " - " + poses[idxPose])
     show()
 
-def plotTrainingDistributions(together=True):
+def plotObjPoseTrainingDistributions(together=True):
     if together:
         pr(1, "plotting all training distributions together")
 
@@ -745,18 +744,46 @@ def plotTrainingDistributions(together=True):
         for n in range(N):
             for i in range(I):
                 for idxFeature in range(M):
-                    color = cm(1. * (n+i) / K)
+                    color = cm(1. * float(n*i+i) / (N*I))
                     dist = dfgop(n, i, idxFeature)
-                    plot(x, dist.pdf(x))
+                    plot(x, dist.pdf(x),color=color)
         title("All Training Distributions")
         show()
     else:
         for n in range(N):
             for i in range(I):
-                plotTrainingDistribution(n,i)
+                plotObjPoseTrainingDistribution(n,i)
                 wait()
 
+def plotFeatureTrainingDistribution(idxFeature):
+    """plots the learned distribution a specific feature of all object poses"""
+    pr(1, "plotting feature training for feature", idxFeature)
 
+    ax = subplot(1,1,1)
+    cm = get_cmap('gist_rainbow')
+    x = np.linspace(0, 600, 1000)
+    dash = False
+    for idxObject in range(N):
+        for idxPose in range(I):
+            color = cm(1. * float(idxObject*I+idxPose) / (N*I))
+            dist = dfgop(idxObject, idxPose, idxFeature)
+            l = objects[idxObject] + " - " + poses[idxPose]
+            if dash:
+                dash = False
+                ax.plot(x, dist.pdf(x), '--', label=l, color=color)
+            else:
+                dash = True
+                ax.plot(x, dist.pdf(x), label=l, color=color)
+
+    handles, labels = ax.get_legend_handles_labels()
+    ax.legend(handles,labels, fontsize=10)
+    title("Trained distributions for feature: " + str(idxFeature))
+    show()
+
+def plotFeatureTrainingDistributions():
+    for idxFeature in range(M):
+        plotFeatureTrainingDistribution(idxFeature)
+        wait()
 
 # to prevent overfitting, lets only use a subset of V < M samples
 # how to select which samples to use?
@@ -764,7 +791,7 @@ def plotTrainingDistributions(together=True):
 # why not choose the ones with the smallest error as well
 # V multiples of K
 
-V = 4
+V = 2
 
 trainingFile = "MODEL_SIFT_STANDARD2.txt"
 percentHoldOut = 0.2  # cross-validation
@@ -772,12 +799,13 @@ percentHoldOut = 0.2  # cross-validation
 importTrainingData(trainingFile, percentHoldOut)
 train()
 
-# plotTrainingDistribution(0, 0)
-# plotTrainingDistributions(together=False)
+# plotObjPoseTrainingDistribution(0, 0)
+# plotObjPoseTrainingDistributions(together=False)
 # plotTrainingPosteriors()
 
-# plotTrainingDistributions()
-plotCrossValPosteriors()
+plotFeatureTrainingDistributions()
+# plotObjPoseTrainingDistributions()
+# plotCrossValPosteriors()
 
 # testFile = "real_exp.txt"
 

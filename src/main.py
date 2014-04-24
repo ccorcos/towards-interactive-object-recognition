@@ -803,17 +803,18 @@ train()
 # plotObjPoseTrainingDistributions(together=False)
 # plotTrainingPosteriors()
 
+
+
 plotFeatureTrainingDistributions()
 # plotObjPoseTrainingDistributions()
-# plotCrossValPosteriors()
+plotCrossValPosteriors()
+
+
+
 
 # testFile = "real_exp.txt"
-
-# test = importTestData(testFile)
-# test1 = test[:, 0]
-# test2 = test[:, 1]
-# observe(test1)
-# plotPosteriors_op(1)
-# clearHistory()
-# observe(test2)
-# plotPosteriors_op(1)
+testFile = "first_home_book_weird_pose_down_diff_bg.txt"
+test = importTestData(testFile)
+test1 = test[:, 0]
+observe(test1)
+plotPosteriors_op(1)

@@ -64,6 +64,36 @@ observationHistory = [[]]  # no observation or action at t=0
 actionHistory = [[]]  # no observation or action at t=0
 
 # ----------------------------------------------------------
+# MAIN
+# some functions converting actions and poses
+# ----------------------------------------------------------
+
+def main():
+
+    trainingFile = "MODEL_SIFT_STANDARD2.txt"
+    percentHoldOut = 0.2  # cross-validation
+    testFile = "real_exp.txt"
+
+    importTrainingData(trainingFile, percentHoldOut)
+    train()
+
+    # PLOT TRAINING
+    # If M is large, plotting the training may take a while:
+    # with M = 650, it took ~ 20 seconds to render
+    # plotFeatureTrainingDistributions()
+    # plotObjPoseTrainingDistributions(together=True)
+    # plotObjPoseTrainingDistributions(together=False)
+    
+    # PLOT CROSS VALIDATION
+    # plotCrossValPosteriors()
+
+    # PLOT TEST DATA
+    # plotTestPosteriors(testFile)
+    
+    pr(0, "finished")
+
+
+# ----------------------------------------------------------
 # TRAINING
 # some functions for training the model
 # ----------------------------------------------------------
@@ -700,7 +730,7 @@ def plotCrossValPosteriors():
             wait()
 
 
-def plotTraining(idxObject, idxPose):
+def plotObjPoseTrainingDistribution(idxObject, idxPose):
     """Plots the learned feature distributions for a 
     specific object-pose"""
 
@@ -711,29 +741,70 @@ def plotTraining(idxObject, idxPose):
     for idxFeature in range(M):
         color = cm(1. * idxFeature / M)
         dist = dfgop(idxObject, idxPose, idxFeature)
-        title(objects[idxObject] + " - " + poses[idxPose])
-        plot(x, dist.pdf(x))
+        plot(x, dist.pdf(x), color=color)
     title("Training: " + objects[idxObject] + " - " + poses[idxPose])
     show()
 
+def plotObjPoseTrainingDistributions(together=True):
+    if together:
+        pr(1, "plotting all training distributions together")
 
-trainingFile = "MODEL_SIFT_STANDARD2.txt"
-percentHoldOut = 0.2  # cross-validation
+        cm = get_cmap('gist_rainbow')
+        x = np.linspace(0, 600, 1000)
+        for n in range(N):
+            for i in range(I):
+                for idxFeature in range(M):
+                    color = cm(1. * float(n*i+i) / (N*I))
+                    dist = dfgop(n, i, idxFeature)
+                    plot(x, dist.pdf(x),color=color)
+        title("All Training Distributions")
+        show()
+    else:
+        for n in range(N):
+            for i in range(I):
+                plotObjPoseTrainingDistribution(n,i)
+                wait()
 
-importTrainingData(trainingFile, percentHoldOut)
-train()
+def plotFeatureTrainingDistribution(idxFeature):
+    """plots the learned distribution a specific feature of all object poses"""
+    pr(1, "plotting feature training for feature", idxFeature)
 
-# plotTraining(0, 0)
-# plotTrainingPosteriors()
-# plotCrossValPosteriors()
+    ax = subplot(1,1,1)
+    cm = get_cmap('gist_rainbow')
+    x = np.linspace(0, 600, 1000)
+    dash = False
+    for idxObject in range(N):
+        for idxPose in range(I):
+            color = cm(1. * float(idxObject*I+idxPose) / (N*I))
+            dist = dfgop(idxObject, idxPose, idxFeature)
+            l = objects[idxObject] + " - " + poses[idxPose]
+            if dash:
+                dash = False
+                ax.plot(x, dist.pdf(x), '--', label=l, color=color)
+            else:
+                dash = True
+                ax.plot(x, dist.pdf(x), label=l, color=color)
 
-testFile = "real_exp.txt"
+    handles, labels = ax.get_legend_handles_labels()
+    ax.legend(handles,labels, fontsize=10)
+    title("Trained distributions for feature: " + str(idxFeature))
+    show()
 
-test = importTestData(testFile)
-test1 = test[:, 0]
-test2 = test[:, 1]
-observe(test1)
-plotPosteriors_op(1)
-clearHistory()
-observe(test2)
-plotPosteriors_op(1)
+def plotFeatureTrainingDistributions():
+    for idxFeature in range(M):
+        plotFeatureTrainingDistribution(idxFeature)
+        wait()
+
+def plotTestPosteriors(testFile):
+
+    test = importTestData(testFile)
+
+    m,n = test.shape
+    for i in range(n):
+        observe(test[:,i])
+        plotPosteriors_op(1)
+        clearHistory()
+        wait()
+
+if __name__ == "__main__":
+    main()

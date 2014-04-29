@@ -236,9 +236,9 @@ def importTrainingData(fileName, xValPercent):
 
     pr(1, "finished import")
     pr(2, "N objects:", N)
-    pr(3, objects)
+    pr(100, objects)
     pr(2, "I poses:", I)
-    pr(3, poses)
+    pr(100, poses)
     pr(2, "M features:", M)
     pr(2, "Re samples:", Re)
     pr(2, "R for training:", R)

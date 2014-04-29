@@ -60,6 +60,12 @@ def pr(level, *args, **kwargs):
     elif level == 2:
         print "   * " + string
     elif level == 3:
+        print "     = " + string
+    elif level == 4:
+        print "       > " + string
+    elif level == 4:
+        print "         + " + string
+    elif level == 100:
         lines = string.split("\n")
         for line in lines:
             print "      " + line

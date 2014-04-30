@@ -75,7 +75,7 @@ def main():
 
     pr(0, "PGM for Optimal Actions in Computer Vision")
 
-    trainingFile = "MODEL_SIFT_STANDARD2.txt"
+    trainingFile = "MODEL_SIFT_STANDARD_FULL_MIX.txt"
     percentHoldOut = 0.2  # cross-validation
     testFile = "real_exp.txt"
 
@@ -97,9 +97,9 @@ def main():
 
     # OPTIMAL ACTION SELECTION
     pr(0, "Optimal Action Selection")
-    test = importTestData(testFile)
-
-    test1 = test[:, 0]
+    test1 = crossValErrors[0, 0,:, 18]
+    # test = importTestData(testFile)
+    # test1 = test[:, 0]
     pr(1, "observing first observation")
     observe(test1)
     plotPosteriors_op(1)

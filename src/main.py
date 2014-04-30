@@ -68,10 +68,12 @@ actionHistory = [[]]  # no observation or action at t=0
 # some functions converting actions and poses
 # ----------------------------------------------------------
 
-nParticles = 100
+nParticles = 160 # 10 * K
 
 
 def main():
+
+    pr(0, "PGM for Optimal Actions in Computer Vision")
 
     trainingFile = "MODEL_SIFT_STANDARD2.txt"
     percentHoldOut = 0.2  # cross-validation
@@ -92,6 +94,17 @@ def main():
 
     # PLOT TEST DATA
     # plotTestPosteriors(testFile)
+
+    # OPTIMAL ACTION SELECTION
+    pr(0, "Optimal Action Selection")
+    test = importTestData(testFile)
+
+    test1 = test[:, 1]
+    pr(1, "observing first observation")
+    observe(test1)
+    plotPosteriors_op(1)
+    wait()
+    a = optimalAction(1)
 
     pr(0, "finished")
 
@@ -162,7 +175,7 @@ def importTrainingData(fileName, xValPercent):
 
     global objects, poses, trainingData, N, I, J, K, M, Re, R, Rx, trainingErrors, crossValErrors
 
-    pr(0, "importing feature errors from", fileName)
+    pr(1, "importing feature errors from", fileName)
 
     # open file
     f = open(fileName, 'r')
@@ -237,7 +250,6 @@ def importTrainingData(fileName, xValPercent):
     # K: number of object-poses
     K = N * I
 
-    pr(1, "finished import")
     pr(2, "N objects:", N)
     pr(100, objects)
     pr(2, "I poses:", I)
@@ -264,7 +276,7 @@ def importTestData(fileName):
     @result: data is an array of shape (M, sample or observation)
     '''
 
-    pr(0, "importing test data from", fileName)
+    pr(1, "importing test data from", fileName)
     # open file
     f = open(fileName, 'r')
     # read string
@@ -703,7 +715,6 @@ def particle_posteriors_op(idxObservation, idxParticle, idxAction):
                    for i in range(I)]
                   for n in range(N)])
 
-
 @memoize
 def particle_posteriors_o(idxObservation, idxParticle, idxAction):
     return sum(particle_posteriors_op(idxObservation, idxParticle, idxAction), 1)
@@ -714,28 +725,45 @@ def particle_posteriors_o(idxObservation, idxParticle, idxAction):
 # some functions for determining the optimal action by minimal expected entropy
 # ----------------------------------------------------------
 
+@memoize
+def expected_entropy_posterior_o(idxObservation, idxAction):
+    """
+    For a specific action and an unknown observation, idxObservation, 
+    we want to compute the expected entropy of the posterior distribution.
+    This is done by sampling the posterior distribution, computing the entropy
+    for all particles in the sampled distribution, and taking the mean of these
+    entropies.
+    """
+    particleEntropies = []
+    for idxParticle in range(nParticles):
+        particlePosteriors = particle_posteriors_o(idxObservation, idxParticle, idxAction)
+        particlePosteriorEntropy = entropy(particlePosteriors)
+        particleEntropies.append(particlePosteriorEntropy)
+    expectedEntropy = mean(particleEntropies)
+    return expectedEntropy
 
-# @memoize
-# def expected_posterior_op(idxObservation, idxAction):
-#     particle_posteriors = []
-#     for idxParticle in range(nParticles):
-#         particle_posteriors.append(
-#             particle_posteriors_op(idxObservation, idxParticle, idxAction))
-#     return mean(particle_posteriors, 0)
 
+@memoize
+def optimalAction(idxObservation):
+    """
+    The optimal actions has the minimum expected entropy for the object posteriors
+    of the next observation.
+    In this case, idxObservation refers to the most recent observation, not the 
+    observation over which we'd like to compute the expected entropy posterior
+    """
 
-# @memoize
-# def expected_posterior_o(idxObservation, idxAction):
-#     particle_posteriors = []
-#     for idxParticle in range(nParticles):
-#         particle_posteriors.append(
-#             particle_posteriors_o(idxObservation, idxParticle, idxAction))
-#     return mean(particle_posteriors, 0)
+    actionExpectedEntropies = []
+    for idxAction in range(J):
+        expectedEntropy = expected_entropy_posterior_o(idxObservation+1, idxAction)
+        actionExpectedEntropies.append(expectedEntropy)
 
+    pr(1, "Expected entropy for each action:")
+    pr(2, actionExpectedEntropies)
 
-# @memoize
-# def entropy_expected_posterior_o(idxObservation, idxAction):
-#     return entropy(expected_posterior_o(idxObservation, idxAction))
+    bestAction = actions[actionExpectedEntropies.index(min(actionExpectedEntropies))]
+
+    pr(1, "The optimal action is", bestAction)
+    return  bestAction
 
 
 # ----------------------------------------------------------

@@ -99,7 +99,7 @@ def main():
     pr(0, "Optimal Action Selection")
     test = importTestData(testFile)
 
-    test1 = test[:, 1]
+    test1 = test[:, 0]
     pr(1, "observing first observation")
     observe(test1)
     plotPosteriors_op(1)
@@ -773,6 +773,7 @@ def optimalAction(idxObservation):
 
 
 def entropy(arr):
+    arr = filter(lambda x: x != 0, arr)
     return -sum(arr * log(arr))
 
 

@@ -552,9 +552,9 @@ def sampleEvidenceDistribution(idxObservation, idxAction):
     idxObservation is the "next" observation that hasn't happened yet.
     We will need to sample particles for each action
     """
-    string = "p(F_" + str(idxObservation) + "|F_1:" + \
-        str(idxObservation - 1) + ",A_1:" + str(idxObservation - 1) + ")"
-    pr(1, "Generating", nParticles, "samples of", string)
+    pr(1, "Generating", nParticles, "samples of the evidence distribution")
+    pr(2, "idxObservation:", idxObservation)
+    pr(2, "idxAction:", idxAction)
 
     # first sample object poses from the last posterior
     # then sample the observations
@@ -783,13 +783,7 @@ def logOfSumGivenLogs(aLogs):
 
 @memoize
 def nextPose(pose, action):
-    '''
-    @summary: computes the next pose given an action
-    @param pose: pose name
-    @param action: action name
-    @result: next pose name
-    '''
-    # FIX: hard coded
+    """Returns the pose after an action is applied to a pose"""
     if pose not in poses:
         raise ex("ERROR: unrecognized pose")
     if action not in actions:
@@ -835,15 +829,8 @@ def nextPose(pose, action):
 
 @memoize
 def prevPose(pose, action):
-    '''
-    @summary: computes the previous pose given an action
-    @param pose: pose name
-    @param action: action name
-    @result: previous pose name
-    '''
     # these actions pose combinations just happen to be complementary so
-    # its the same thing as next pose
-    # FIX: hard coded
+    # its the same thing...
     if pose not in poses:
         raise ex("ERROR: unrecognized pose")
     if action not in actions:
@@ -889,12 +876,12 @@ def prevPose(pose, action):
 
 @memoize
 def nextPoseIdx(poseIdx, actionIdx):
-    return pose.index(nextPose(poses[poseIdx], actions[actionIdx]))
+    return poses.index(nextPose(poses[poseIdx], actions[actionIdx]))
 
 
 @memoize
 def prevPoseIdx(poseIdx, actionIdx):
-    return pose.index(prevPose(poses[poseIdx], actions[actionIdx]))
+    return poses.index(prevPose(poses[poseIdx], actions[actionIdx]))
 
 
 @memoize

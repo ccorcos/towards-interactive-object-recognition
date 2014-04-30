@@ -68,7 +68,12 @@ actionHistory = [[]]  # no observation or action at t=0
 # some functions converting actions and poses
 # ----------------------------------------------------------
 
+nParticles = 160 # 10 * K
+
+
 def main():
+
+    pr(0, "PGM for Optimal Actions in Computer Vision")
 
     trainingFile = "MODEL_SIFT_STANDARD2.txt"
     percentHoldOut = 0.2  # cross-validation
@@ -83,13 +88,24 @@ def main():
     # plotFeatureTrainingDistributions()
     # plotObjPoseTrainingDistributions(together=True)
     # plotObjPoseTrainingDistributions(together=False)
-    
+
     # PLOT CROSS VALIDATION
     # plotCrossValPosteriors()
 
     # PLOT TEST DATA
     # plotTestPosteriors(testFile)
-    
+
+    # OPTIMAL ACTION SELECTION
+    pr(0, "Optimal Action Selection")
+    test = importTestData(testFile)
+
+    test1 = test[:, 0]
+    pr(1, "observing first observation")
+    observe(test1)
+    plotPosteriors_op(1)
+    wait()
+    a = optimalAction(1)
+
     pr(0, "finished")
 
 
@@ -159,7 +175,7 @@ def importTrainingData(fileName, xValPercent):
 
     global objects, poses, trainingData, N, I, J, K, M, Re, R, Rx, trainingErrors, crossValErrors
 
-    pr(0, "importing feature errors from", fileName)
+    pr(1, "importing feature errors from", fileName)
 
     # open file
     f = open(fileName, 'r')
@@ -226,15 +242,14 @@ def importTrainingData(fileName, xValPercent):
 
     # split the samples into training and cross-validation
     Rx = int(round(xValPercent * Re))
-    crossValErrors = errors[:, :,:, :Rx]
+    crossValErrors = errors[:,:,:, :Rx]
 
-    trainingErrors = errors[:, :,:, Rx:]
+    trainingErrors = errors[:,:,:, Rx:]
     _, _, _, R = trainingErrors.shape
 
     # K: number of object-poses
     K = N * I
 
-    pr(1, "finished import")
     pr(2, "N objects:", N)
     pr(100, objects)
     pr(2, "I poses:", I)
@@ -261,7 +276,7 @@ def importTestData(fileName):
     @result: data is an array of shape (M, sample or observation)
     '''
 
-    pr(0, "importing test data from", fileName)
+    pr(1, "importing test data from", fileName)
     # open file
     f = open(fileName, 'r')
     # read string
@@ -302,11 +317,14 @@ class Distribution1D:
         """returns the log probability density"""
         return -log(self.sigma * sqrt(2 * pi)) - (value - self.mu) ** 2 / (2 * self.sigma ** 2)
 
+    def sample(self):
+        return normal(self.mu, self.sigma)
+
 
 @memoize
 def dfgop(idxObject, idxPose, idxFeature):
     """likelihood distribution of p(f|o,p) for the training data"""
-    return Distribution1D(trainingErrors[idxObject, idxPose, idxFeature, :])
+    return Distribution1D(trainingErrors[idxObject, idxPose, idxFeature,:])
 
 
 def train():
@@ -324,6 +342,7 @@ def train():
 # history, observing data, etc.
 # ----------------------------------------------------------
 
+
 def clearHistory():
     '''
     @summary: clears the function call caches
@@ -339,6 +358,16 @@ def clearHistory():
     posterior_op.reset()
     likelihood.reset()
     evidence.reset()
+
+    sampleEvidenceDistribution.reset()
+    particle_logPosterior_op.reset()
+    particle_logLikelihood.reset()
+    particle_logEvidence.reset()
+    particle_posterior_op.reset()
+    particle_likelihood.reset()
+    particle_evidence.reset()
+    particle_posteriors_op.reset()
+    particle_posteriors_o.reset()
 
 
 def whichObservationIdx():
@@ -378,6 +407,7 @@ def observe(F, printing=False):
 # INFERENCE
 # functions for inferencing on the model
 # ----------------------------------------------------------
+
 
 def logOfSumGivenLogs(aLogs):
     """A nifty trick for taking the sum of really small numbers
@@ -510,19 +540,251 @@ def posteriors_op(idxObservation):
 
 
 # ----------------------------------------------------------
-# ACTIONS
-# some functions converting actions and poses
+# PARTICLE FILTERING
+# some functions sampling the posterior distribution
 # ----------------------------------------------------------
 
 @memoize
+def sampleEvidenceDistribution(idxObservation, idxAction):
+    """
+    To sample the posterior, we first need to sample the evidence
+    distribution to get particles representing observations.
+    idxObservation is the "next" observation that hasn't happened yet.
+    We will need to sample particles for each action
+    """
+    pr(1, "Generating", nParticles, "samples of the evidence distribution")
+    pr(2, "idxObservation:", idxObservation)
+    pr(2, "idxAction:", idxAction)
+
+    # first sample object poses from the last posterior
+    # then sample the observations
+    # get the posteriors
+    lastPs = posteriors_op(idxObservation - 1)  # [object][pose]
+    # flatten for sampling
+    flatps = lastPs.reshape(K)
+    # sample a uniform distribution
+    numbers = uniform(0, 1, nParticles)
+    # flatten and sample the discrete posterior distribution
+    flatpsAcc = add.accumulate(flatps)
+    particleFlatIdx = digitize(numbers, flatpsAcc)
+    # convert the sample into a object pose indices
+    particleObjPoseIdx = array(unravel_index(particleFlatIdx, (N, I)))
+
+    # sample observations for these particles
+    particles = []
+    for i in range(nParticles):
+        Fsample = []
+        objPoseIdx = particleObjPoseIdx[:, i]
+        idxObject = objPoseIdx[0]
+        idxPose = objPoseIdx[1]
+
+        # convert pose based on action
+        nextIdxPost = nextPoseIdx(idxPose, idxAction)
+
+        for idxFeature in range(M):
+            fsample = dfgop(idxObject, nextIdxPost, idxFeature).sample()
+            Fsample.append(fsample)
+        particles.append(Fsample)
+    return array(particles)
+
+
+@memoize
+def particle_logPosterior_op(idxObservation, idxObject, idxPose, idxParticle, previousActionIdx):
+    """
+    We need a separate posterior function for computing the posterior of the particles.
+    idxObservation is the "next" observation that hasn't happened yet.
+    """
+    if (idxObservation == 0):
+        print "WARNING: No reason to be calculating this"
+        return 1. / K
+    elif (idxObservation == 1):
+        print "WARNING: No reason to be calculating this"
+        logPrior = logPosterior_op(idxObservation - 1,
+                                   idxObject,
+                                   idxPose)
+        thisLogLikelihood = particle_logLikelihood(idxObservation,
+                                                   idxObject,
+                                                   idxPose,
+                                                   idxParticle,
+                                                   previousActionIdx)
+        thisLogEvidence = particle_logEvidence(
+            idxObservation, idxParticle, previousActionIdx)
+        return logPrior + thisLogLikelihood - thisLogEvidence
+    else:
+        previousPoseIdx = prevPoseIdx(idxPose,
+                                      previousActionIdx)
+        lastPosterior = logPosterior_op(idxObservation - 1,
+                                        idxObject,
+                                        previousPoseIdx)
+        thisLogLikelihood = particle_logLikelihood(idxObservation,
+                                                   idxObject,
+                                                   idxPose,
+                                                   idxParticle,
+                                                   previousActionIdx)
+        thisLogEvidence = particle_logEvidence(
+            idxObservation, idxParticle, previousActionIdx)
+        return lastPosterior + thisLogLikelihood - thisLogEvidence
+
+
+@memoize
+def particle_logLikelihood(idxObservation, idxObject, idxPose, idxParticle, idxAction):
+    """
+    To compute the sampled posterior, we must first sample the evidence to create 
+    particles representing observations. We can use these particles to compute 
+    the posterior.
+    """
+    particles = sampleEvidenceDistribution(idxObservation, idxAction)
+    observation = particles[idxParticle]
+    if len(observation) != M:
+        raise ex(
+            "ERROR: Observation length != number of features in the model")
+    # PARALLELIZE
+    # independent features assumption leads to a product of their probabilities
+    accumulate = 0
+    for idxFeature in range(M):
+        logpdf = dfgop(idxObject,
+                       idxPose,
+                       idxFeature).logpdf(observation[idxFeature])
+        accumulate = accumulate + logpdf
+    return accumulate
+
+
+@memoize
+def particle_logEvidence(idxObservation, idxParticle, previousActionIdx):
+    # The Trick:
+    # log (a+ b) = log (a/c + b/c) + log c
+    # c = max(a, b)
+
+    logTerms = []
+    if (idxObservation == 1):
+        print "WARNING: No reason to be calculating this"
+        # PARALLELIZE
+        for idxObject in range(N):
+            # sum over objects
+            for idxPose in range(I):
+                logPrior = logPosterior_op(idxObservation - 1,
+                                           idxObject,
+                                           idxPose)
+
+                thisLogLikelihood = particle_logLikelihood(idxObservation,
+                                                           idxObject,
+                                                           idxPose,
+                                                           idxParticle,
+                                                           previousActionIdx)
+
+                logTerms.append(thisLogLikelihood + logPrior)
+    else:
+        # PARALLELIZE
+        for idxObject in range(N):
+            # sum over objects
+            for idxPose in range(I):
+                # sum over poses
+                previousPoseIdx = prevPoseIdx(idxPose,
+                                              previousActionIdx)
+                logLastPosterior = logPosterior_op(idxObservation - 1,
+                                                   idxObject,
+                                                   previousPoseIdx)
+                thisLogLikelihood = particle_logLikelihood(idxObservation,
+                                                           idxObject,
+                                                           idxPose,
+                                                           idxParticle,
+                                                           previousActionIdx)
+                logTerms.append(thisLogLikelihood + logLastPosterior)
+
+    return logOfSumGivenLogs(logTerms)
+
+
+@memoize
+def particle_posterior_op(idxObservation, idxObject, idxPose, idxParticle, idxAction):
+    return exp(particle_logPosterior_op(idxObservation, idxObject, idxPose, idxParticle, idxAction))
+
+
+@memoize
+def particle_likelihood(idxObservation, idxObject, idxPose, idxParticle, idxAction):
+    return exp(particle_logLikelihood(idxObservation, idxObject, idxPose, idxParticle, idxAction))
+
+
+@memoize
+def particle_evidence(idxObservation, idxParticle, idxAction):
+    return exp(particle_logEvidence(idxObservation, idxParticle, idxAction))
+
+
+@memoize
+def particle_posteriors_op(idxObservation, idxParticle, idxAction):
+    return array([[particle_posterior_op(idxObservation, n, i, idxParticle, idxAction)
+                   for i in range(I)]
+                  for n in range(N)])
+
+@memoize
+def particle_posteriors_o(idxObservation, idxParticle, idxAction):
+    return sum(particle_posteriors_op(idxObservation, idxParticle, idxAction), 1)
+
+
+# ----------------------------------------------------------
+# ACTIONS
+# some functions for determining the optimal action by minimal expected entropy
+# ----------------------------------------------------------
+
+@memoize
+def expected_entropy_posterior_o(idxObservation, idxAction):
+    """
+    For a specific action and an unknown observation, idxObservation, 
+    we want to compute the expected entropy of the posterior distribution.
+    This is done by sampling the posterior distribution, computing the entropy
+    for all particles in the sampled distribution, and taking the mean of these
+    entropies.
+    """
+    particleEntropies = []
+    for idxParticle in range(nParticles):
+        particlePosteriors = particle_posteriors_o(idxObservation, idxParticle, idxAction)
+        particlePosteriorEntropy = entropy(particlePosteriors)
+        particleEntropies.append(particlePosteriorEntropy)
+    expectedEntropy = mean(particleEntropies)
+    return expectedEntropy
+
+
+@memoize
+def optimalAction(idxObservation):
+    """
+    The optimal actions has the minimum expected entropy for the object posteriors
+    of the next observation.
+    In this case, idxObservation refers to the most recent observation, not the 
+    observation over which we'd like to compute the expected entropy posterior
+    """
+
+    actionExpectedEntropies = []
+    for idxAction in range(J):
+        expectedEntropy = expected_entropy_posterior_o(idxObservation+1, idxAction)
+        actionExpectedEntropies.append(expectedEntropy)
+
+    pr(1, "Expected entropy for each action:")
+    pr(2, actionExpectedEntropies)
+
+    bestAction = actions[actionExpectedEntropies.index(min(actionExpectedEntropies))]
+
+    pr(1, "The optimal action is", bestAction)
+    return  bestAction
+
+
+# ----------------------------------------------------------
+# HELPERS
+# some helper functions
+# ----------------------------------------------------------
+
+
+def entropy(arr):
+    arr = filter(lambda x: x != 0, arr)
+    return -sum(arr * log(arr))
+
+
+def logOfSumGivenLogs(aLogs):
+    logC = max(aLogs)
+    return log(sum([exp(logA - logC) for logA in aLogs])) + logC
+
+
+@memoize
 def nextPose(pose, action):
-    '''
-    @summary: computes the next pose given an action
-    @param pose: pose name
-    @param action: action name
-    @result: next pose name
-    '''
-    # FIX: hard coded
+    """Returns the pose after an action is applied to a pose"""
     if pose not in poses:
         raise ex("ERROR: unrecognized pose")
     if action not in actions:
@@ -568,15 +830,8 @@ def nextPose(pose, action):
 
 @memoize
 def prevPose(pose, action):
-    '''
-    @summary: computes the previous pose given an action
-    @param pose: pose name
-    @param action: action name
-    @result: previous pose name
-    '''
     # these actions pose combinations just happen to be complementary so
-    # its the same thing as next pose
-    # FIX: hard coded
+    # its the same thing...
     if pose not in poses:
         raise ex("ERROR: unrecognized pose")
     if action not in actions:
@@ -622,12 +877,12 @@ def prevPose(pose, action):
 
 @memoize
 def nextPoseIdx(poseIdx, actionIdx):
-    return pose.index(nextPose(poses[poseIdx], actions[actionIdx]))
+    return poses.index(nextPose(poses[poseIdx], actions[actionIdx]))
 
 
 @memoize
 def prevPoseIdx(poseIdx, actionIdx):
-    return pose.index(prevPose(poses[poseIdx], actions[actionIdx]))
+    return poses.index(prevPose(poses[poseIdx], actions[actionIdx]))
 
 
 @memoize
@@ -643,6 +898,7 @@ def obj2idx(obj):
 @memoize
 def action2idx(action):
     return actions.index(action)
+
 
 # ----------------------------------------------------------
 # PLOTTING
@@ -704,7 +960,7 @@ def plotTrainingPosteriors():
         for i in range(I):
             ps = []
             for r in range(R):
-                data = trainingErrors[n, i, :, r]
+                data = trainingErrors[n, i,:, r]
                 observe(data)
                 ps.append(posteriors_op(1))
                 clearHistory()
@@ -722,7 +978,7 @@ def plotCrossValPosteriors():
         for i in range(I):
             ps = []
             for r in range(Rx):
-                data = crossValErrors[n, i, :, r]
+                data = crossValErrors[n, i,:, r]
                 observe(data)
                 ps.append(posteriors_op(1))
                 clearHistory()
@@ -745,6 +1001,7 @@ def plotObjPoseTrainingDistribution(idxObject, idxPose):
     title("Training: " + objects[idxObject] + " - " + poses[idxPose])
     show()
 
+
 def plotObjPoseTrainingDistributions(together=True):
     if together:
         pr(1, "plotting all training distributions together")
@@ -754,28 +1011,29 @@ def plotObjPoseTrainingDistributions(together=True):
         for n in range(N):
             for i in range(I):
                 for idxFeature in range(M):
-                    color = cm(1. * float(n*i+i) / (N*I))
+                    color = cm(1. * float(n * i + i) / (N * I))
                     dist = dfgop(n, i, idxFeature)
-                    plot(x, dist.pdf(x),color=color)
+                    plot(x, dist.pdf(x), color=color)
         title("All Training Distributions")
         show()
     else:
         for n in range(N):
             for i in range(I):
-                plotObjPoseTrainingDistribution(n,i)
+                plotObjPoseTrainingDistribution(n, i)
                 wait()
+
 
 def plotFeatureTrainingDistribution(idxFeature):
     """plots the learned distribution a specific feature of all object poses"""
     pr(1, "plotting feature training for feature", idxFeature)
 
-    ax = subplot(1,1,1)
+    ax = subplot(1, 1, 1)
     cm = get_cmap('gist_rainbow')
     x = np.linspace(0, 600, 1000)
     dash = False
     for idxObject in range(N):
         for idxPose in range(I):
-            color = cm(1. * float(idxObject*I+idxPose) / (N*I))
+            color = cm(1. * float(idxObject * I + idxPose) / (N * I))
             dist = dfgop(idxObject, idxPose, idxFeature)
             l = objects[idxObject] + " - " + poses[idxPose]
             if dash:
@@ -786,25 +1044,28 @@ def plotFeatureTrainingDistribution(idxFeature):
                 ax.plot(x, dist.pdf(x), label=l, color=color)
 
     handles, labels = ax.get_legend_handles_labels()
-    ax.legend(handles,labels, fontsize=10)
+    ax.legend(handles, labels, fontsize=10)
     title("Trained distributions for feature: " + str(idxFeature))
     show()
+
 
 def plotFeatureTrainingDistributions():
     for idxFeature in range(M):
         plotFeatureTrainingDistribution(idxFeature)
         wait()
 
+
 def plotTestPosteriors(testFile):
 
     test = importTestData(testFile)
 
-    m,n = test.shape
+    m, n = test.shape
     for i in range(n):
-        observe(test[:,i])
+        observe(test[:, i])
         plotPosteriors_op(1)
         clearHistory()
         wait()
+
 
 if __name__ == "__main__":
     main()

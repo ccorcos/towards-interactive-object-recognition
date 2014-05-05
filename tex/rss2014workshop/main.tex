@@ -5,14 +5,20 @@
 \usepackage[numbers]{natbib}
 \usepackage{multicol}
 \usepackage[bookmarks=true]{hyperref}
+\usepackage{multirow}
+\usepackage{graphicx}
 
-\pdfinfo{
-   /Author (Homer Simpson)
-   /Title  (Robots: Our new overlords)
-   /CreationDate (D:20101201120000)
-   /Subject (Robots)
-   /Keywords (Robots;Overlords)
-}
+\newcommand{\figref}[1]{Fig.~\ref{#1}}
+
+
+
+%\pdfinfo{
+%   /Author (Homer Simpson)
+%   /Title  (Robots: Our new overlords)
+%   /CreationDate (D:20101201120000)
+%   /Subject (Robots)
+%   /Keywords (Robots;Overlords)
+%}
 
 \begin{document}
 
@@ -67,16 +73,32 @@ The abstract goes here.
 
 %* show the problem
 %* introduce the idea
+%* contributions?
 
 % problem of static object recognition
 Although multiple successful state-of-the-art object recognition systems have been developed, we still cannot say that the problem of object recognition has been solved.
-We claim that the reason for that is already included in the problem formulation. Given static images there are cases where it is impossible to recognize the object simply because of lack of distinctive features. One way to overcome this problem has been presented in the area of object segmentation where robot-objects interaction was introduced. 
+We claim that the reason for that is already included in the problem formulation. Given static images there are cases where it is impossible to recognize the object simply because of lack of distinctive features (see~\figref{fig:pr2}). One way to overcome this problem has been presented in the area of object segmentation where robot-objects interaction was introduced. 
 
 % introduce the idea
 In this work we take advantage of robot's manipulation capabilities and apply them in the domain of object recognition. In our approach we tackle interactive object recognition problem where we look for the action that will minimize the expected entropy over objects distribution. Therefore we want to be optimal in the number of actions that will lead us to successful object recognition.
 
-%contributions
+\setlength{\tabcolsep}{0.1em}
+\begin{figure}[ht]
+\begin{tabular}{cccc}
+\multicolumn{2}{c}{\multirow{-5}{*}{\includegraphics[width=0.46\columnwidth]{pics/pr2_init.jpg}}} & \includegraphics[width=0.23\columnwidth]{pics/first_back.jpg} 
+&\includegraphics[width=0.23\columnwidth]{pics/first_cover1.jpg} \\
+\multicolumn{2}{c}{} & \includegraphics[width=0.23\columnwidth]{pics/first_back.jpg} 
+&\includegraphics[width=0.23\columnwidth]{pics/first_cover2.jpg} \\
+\multicolumn{2}{c}{\includegraphics[width=0.45\columnwidth]{pics/pr2_grasp.jpg}}
+& \multicolumn{2}{c}{\includegraphics[width=0.45\columnwidth]{pics/pr2_rotate.jpg}}
+\end{tabular}
+\caption{Top-left: The service robot PR2 trying to recognize a book based on the back. Database of objects consists of book 1 (top-right, NE and NW) and book 2, (top-right, SE and SW) that look the same from the back. PR2 has to take the optimal action in order to recognize which book it is. In this case it means it flips it over(bottom-left, bottom-right).}
+\label{fig:pr2}
+\end{figure}
 
+%contributions
+%* novel probabilistic model for object recognition
+%* action selection probabilistic algorithm to pick the optimal action in order to recognize the object
 
 \section{Related Work}
 
@@ -92,12 +114,14 @@ images and recognized objects based on a set of visual features  such as SIFT~\c
 There has also been plethora of work on static object recognition that resulted in various systems.
 	
 % examples of static object recognition systems	
-	One of the most efficient and robust object recognition systems was developed by Tang et al.~\cite{tang2012textured}. It is worth mentioning that the system took the 1st place in the ICRA 2011 Solutions in Perception instance recognition challenge. %The system can be divided into several steps. In the training phase a full object model is created, then it is transformed into a mesh, and finally, the RGB data is projected onto the object model acquired in the previous steps. The authors decided to use SIFT features and color histograms in order to fully describe the textural property of the object. In the testing phase plane extraction and euclidean clustering algorithms are employed in order to segment the object. As next steps color model matching and SIFT feature matching are used to recognize the object. The algorithm also performs geometric pose estimation as well as final scene verification and refinement using global scene consistency checks. 
+	One of the most efficient and robust object recognition systems was developed by Tang et al.~\cite{tang2012textured}. The authors use color model matching and SIFT feature matching to recognize the object. The algorithm also performs geometric pose estimation as well as final scene verification and refinement using global scene consistency checks. 
 
-A different approach was discussed by Weijer and Khan~\cite{van2013fusing} where the authors compare various bag-of-words based recognition algorithms. The algorithm represents an image as a set of local regions where each of them is represented as a visual vocabulary. %Different objects correspond to different histograms (called bags-of-words) over the created vocabulary. An extracted bag-of-words histogram can be compared to all the histograms stored in the memory and thus, an object can be labelled as one of the previously seen objects. 
+A different approach was discussed by Weijer and Khan~\cite{van2013fusing} where the authors compare various bag-of-words based recognition algorithms. The algorithm represents an image as a set of local regions where each of them is represented as a visual vocabulary. Different objects correspond to different histograms (called bags-of-words) over the created vocabulary. An extracted bag-of-words histogram can be compared to all the histograms stored in the memory and thus, an object can be labelled as one of the previously seen objects.
+
+Although being very successful both of these approaches would not be able to recognize the correct object presented in~\figref{fig:pr2}. That is why we incorporate robot's manipulation capabilities to solve that problem.
 
 %intro to interactive segmentation
-The idea of a robot interacting with the scene to improve its perceptual skills has been particularly explored in the area of interactive segmentation. Hereby, we present the most recent work from this field.
+The idea of a robot interacting with the scene to improve its perceptual skills has been particularly explored in the area of interactive segmentation.
 
 %interactive segmentation
 Segmentation of rigid objects from a video stream 

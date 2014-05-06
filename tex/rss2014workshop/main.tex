@@ -138,7 +138,7 @@
 
 
     % static object recognition intro
-	Research in perception has traditionally focused on  static images and recognized objects based on a set of visual features  such as SIFT~\cite{lowe2004distinctive}, SURF~\cite{bay2006surf} or ORB~\cite{rublee2011orb}.
+	Research in perception has traditionally focused on  static images and recognized objects based on a set of visual features such as SIFT~\cite{lowe2004distinctive}, SURF~\cite{bay2006surf} or ORB~\cite{rublee2011orb}.
     There has also been plethora of work on static object recognition that resulted in various systems.
 	
     % examples of static object recognition systems	
@@ -146,18 +146,18 @@
 
     A different approach was discussed by Weijer and Khan~\cite{van2013fusing} where the authors compare various bag-of-words based recognition algorithms. The algorithm represents an image as a set of local regions where each of them is represented as a visual vocabulary. Different objects correspond to different histograms (called bags-of-words) over the created vocabulary. An extracted bag-of-words histogram can be compared to all the histograms stored in the memory and thus, an object can be labelled as one of the previously seen objects.
 
-    Although being very successful both of these approaches would not be able to recognize the correct object presented in~\figref{fig:pr2}. That is why we incorporate robot's manipulation capabilities to solve that problem.
+    Although very successful both of these approaches would not be able to correctly recognize the ambiguous object presented in~\figref{fig:pr2}. That is why we employ robot manipulation to solve that problem.
 
     %intro to interactive segmentation
     The idea of a robot interacting with the scene to improve its perceptual skills has been particularly explored in the area of interactive segmentation.
 
     %interactive segmentation
-    Segmentation of rigid objects from a video stream of objects being moved by a robot has been first addressed by Fitzpatrick et. al.~\cite{fitzpatrick_active_vision} and Kenney et. al.~\cite{KenneyInteractive}. Katz and Brock~\cite{Katz-WS-MM-ICRA2011} address the problem of segmenting the articulated objects. Another technique was presented by \cite{bergstrom11icvs}, where the authors propose  an   approach  to interactive  segmentation that  requires initial  labeling using  a 3D segmentation  through  fixation  which  results  in  a  rough  initial segmentation. The robot interacts with the scene to disambiguate the hypotheses.
+    Segmentation of rigid objects from a video stream of objects being moved by a robot was first addressed by Fitzpatrick et. al.~\cite{fitzpatrick_active_vision} and Kenney et. al.~\cite{KenneyInteractive}. Katz and Brock~\cite{Katz-WS-MM-ICRA2011} address the problem of segmenting the articulated objects. Another technique was presented by \cite{bergstrom11icvs}, where the authors propose an approach to interactive segmentation that requires initial labeling using  a 3D segmentation through fixation which results in a rough initial segmentation. The robot interacts with the scene to disambiguate the hypotheses.
 
     %something about methods using expected entropy?
 
     %our work intro interactive object recognition
-    All these approaches do not take into consideration action choices, action is assumed to be known and performed either by a human or a robot. In this work we introduce a probabilistic method to choose the best action based on robot's observations. To the best of our knowledge, the problem of interactive object recognition has not been addressed before. 
+    All these approaches do not take into consideration action choices. Actions are assumed to be known and performed either by a human or a robot. In this work we introduce a probabilistic method to choose the best action based on robot's observations. To the best of our knowledge, the problem of interactive object recognition has not been addressed before. 
 
 \section{Approach}
     This model has two parts. The first part deals only with object recognition and the second part extends this model for determining optimal actions. The object recognition model is a simple discriminative model for predicting object and pose. This model is agnostic of the type of features used so long as there exists some matching function for comparing features of the same type. The action selection part of this model extends the object recognition model in time and determines the optimal actions by the minimum expected entropy of the object predictions across all potential actions. 

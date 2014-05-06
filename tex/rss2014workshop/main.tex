@@ -18,6 +18,10 @@
 
 % Commands
     \newcommand{\figref}[1]{Fig.~\ref{#1}}
+    \newcommand{\secref}[1]{Sec.~\ref{#1}}	
+	\renewcommand{\eqref}[1]{Eq.~(\ref{#1})}
+	\newcommand{\tabref}[1]{Tab.~\ref{#1}}
+	\newcommand{\algref}[1]{Algorithm~\ref{#1}}
 
     \newcommand{\prob}[1]{\text{p}(#1)} % probability
     \newcommand{\set}[1]{\mathbf{#1}} % Capital set bold letter
@@ -83,7 +87,8 @@
     \maketitle
 
 \begin{abstract}
-    This paper starts with a probabilitic Bayesian Network approach to predict objects and poses for any variety of extracted features. This basic object recognition model is extended to incorporate actions over time. An optimal solution is derived for determining the best action for expected object recognition in future predictions.   
+%    This paper starts with a probabilitic Bayesian Network approach to predict objects and poses for any variety of extracted features. This basic object recognition model is extended to incorporate actions over time. An optimal solution is derived for determining the best action for expected object recognition in future predictions.   
+% let's leave the abstract out for now. This is the most important part. Let's write it at the end.
 \end{abstract}
 
 \IEEEpeerreviewmaketitle
@@ -95,13 +100,15 @@
     %* contributions?
 
     % I would try something more like this. let me know what you think... 
-    Many state-of-the-art object recognition systems have been developed using a variety of feature extraction techniques. As computer vision matures, it is important to leverage all useful feature extraction techniques together in a single for the best object recognition results. However, static object recognition will always have its limits. Sometimes an object may appear ambigious with respect to another object, and sometimes distinctive features may hidden due to its pose.  We have developed an approach to help tackle both of these problems.
+    Many state-of-the-art object recognition systems have been developed using a variety of feature extraction techniques. As computer vision matures, it is important to leverage all useful feature extraction techniques together in a single for the best object recognition results. However, static object recognition will always have its limits. Sometimes an object may appear ambiguous with respect to another object, and sometimes distinctive features may hidden due to its pose.  In this paper we present an approach to help tackle both of these problems.
 
     % the BN
     We introduce a probabilistic graphical model for combining arbitrary feature extraction techniques into a single object recognition system with the requirement that for any feature type there must be a function given for computing the matching error between two features of the same type. 
 
     % Action prediction
     This model also learns to recognize object in various poses. With this information, we formulate an approach leveraging robotic manipulation to determine the optimal action for future expected object recognition.  
+% I like the beginning. However after that I think you get too much into the details of how exactly it works. Introduction is supposed to be very broad. I wouldn't mention multiple feature types here.    
+    
 
     % OLD INTRO
         % % problem of static object recognition
@@ -161,9 +168,12 @@
 
 \section{Approach}
     This model has two parts. The first part deals only with object recognition and the second part extends this model for determining optimal actions. The object recognition model is a simple discriminative model for predicting object and pose. This model is agnostic of the type of features used so long as there exists some matching function for comparing features of the same type. The action selection part of this model extends the object recognition model in time and determines the optimal actions by the minimum expected entropy of the object predictions across all potential actions. 
+    % it's ok, but I wouldn't emphasize different types of features so much. we mentioned it once already, it's fine. Apart from that, we definitely need to work on language, it has to be much more scientific.
 
     \subsection{Object Recognition Model}
         The object recognition model predicts an object and a pose based on observed features. Objects and poses are treated discriminatively. This model consists of $N$ objects, $O \in \{o_1,o_2, ..., o_N\}$ in $I$ poses $P \in \{p_1,p_2, ..., p_I\}$ resulting in $K = N \cdot I$ object-pose pairs. There are $M$ features of $J$ types $\set{F} = \{\set{F}^1,\set{F}^2, ..., \set{F}^J\} = \left\{ f_1, ...,  f_M\right\}$. This model assumes features are conditionally independent given object and pose. This model also assumes a uniform prior on the object and pose. Thus, the joint distribution is factorized as in equation \ref{eq:fac} resulting a graph showing in figure \ref{fig:simpleGraph}.
+        %I think there's something wrong with equation on the feature types. I dont get this part: = \left\{ f_1, ...,  f_M\right\  
+        %Also, I wouldn't put the factorization equation here. It's too obvious.
 
         \begin{equation}
             \label{eq:fac}
@@ -190,17 +200,22 @@
 
     \subsubsection{Model Construction}
         Before training this model, we first must construct the structure of this model. We selected a set of objects and chose a number of poses we wanted the model to learn. We gathered a set of features for each object-pose pair in an ideal setting to create an initial dataset.
+        % I would introduce a term here. Like a database for example. So that we can refer to it later.
 
         \begin{equation}
             \cursive{D} = \left\{ \left(o_k,p_k,\set{F}_k\right)^{k=K}_{k=1} \right\}
         \end{equation}
+% I think that this indexing with k is confusing. because now it seems that there is k objects.. I know what you want to say. But I think I would even remove this. Also, structure of a model sounds like we want to infer the structure of the graph...
 
-        The model was constructed as set of all unique objects, poses, and features observed in $\cursive{D}$.
+        The model was constructed as set of all unique objects, poses, and features observed in $\cursive{D}$. % I dont really understand this sentence. What is the model exactly?
 
     \subsubsection{Feature Likelihood + Training}
         The likelihood of a feature, $\prob{f|o,p}$ is a distribution derived from feature matching errors. Each feature in the model has an associated type $j$ and a value or descriptor with which to compute a matching error $\cursive{E}^j(\cdot,\cdot)$ with respect to another feature of the same type. 
 
-        Given an observed set of features, $\set{F}_{\text{obs}}$, the best matching error with respect to a feature in the model $f^j \in \set{F}$ is given by equation \ref{eq:bestMatch}.
+        Given an observed set of features, $\set{F}_{\text{obs}}$, the best matching error with respect to a feature in the model $f^j \in \set{F}$ is given by equation
+         \ref{eq:bestMatch}.
+     	% I put new commands in for referencing equations, figures and so on. Please use those.    
+         %matching, descriptors - these are very SIFT-like terms. I don't think one can understand what we mean by matching now. That's why I would also move away from being so generic and just concentrate on our features. At the end we can mention that it is also extendable to other feature types.
 
         \begin{equation}
             \label{eq:bestMatch}
@@ -213,12 +228,12 @@
             \prob{f|o,p} \sim \{\cursive{E}_1(f), ...,  \cursive{E}_R(f)\}
         \end{equation}
 
-        Note that this procedure is agnostic of the type of feature used. In our case, we used only SIFT features and fit the errors with a normal distribution. 
+        Note that this procedure is agnostic of the type of feature used. In our case, we used SIFT features and fit the errors with a normal distribution. 
 
         \begin{equation}
             \prob{f_m|o_n,p_i} \sim \cursive{N}(\mu_{m}^{n,i},\sigma_{m}^{n,i})
         \end{equation}
-
+% I would remove the m index here. It doesnt help much and it's not easily readable
 
     \subsubsection{Object-Pose Inference}
 
@@ -247,10 +262,12 @@
             \label{eq:objPosePosteriorComp}
             \prob{o,p|\set{F}} = \frac{\prob{\set{F}|o,p}}{\sum_{n,i} \prob{\set{F}|o_n,p_i}}
         \end{equation}
+        
+        %I would definitely remove the last equation. We need to write that features are independent given object and a pose and thats why we multiply them.
 
 
     \subsection{Action Selection Model}
-        The action selection model extends the object-recognition model into a time-series model. Actions are modeled as $I$ pairwise relative pose transformations including the \italic{stay} action to determine when the algorithm has converged. The next pose, $P_{t+1}$ is dependent only on the previous pose, $P_t$ and the previous action $A_t$. For our experiment, we consider actions to be deterministic, i.e. $\prob{P_{t+1}|P_t|A_t} \in \{ 0 , 1 \}$.
+        The action selection model extends the object-recognition model into a time-series model. Actions are modeled as $I$ pairwise relative pose transformations including the \italic{stay} action to determine when the algorithm has converged. The next pose, $P_{t+1}$ is dependent only on the previous pose, $P_t$ and the previous action $A_t$. For our experiment, we consider actions to be deterministic, i.e. $\prob{P_{t+1}|P_t,A_t} \in \{ 0 , 1 \}$.
 
     \subsubsection{First Action}
         After initially observing data $\set{F}_1$, we compute the posterior for all object-poses. We consider what is the optimal action $a \in A_1$ which would lead to a new pose $P_2$ and reveal new features $\set{F}_2$. This joint distribution is factorized by equation \ref{eq:firstActionFactorized}, depicted in figure \ref{fig:firstActionGraph}.
@@ -290,6 +307,7 @@
           \label{fig:firstActionGraph}
           \caption{First action model}
         \end{figure}
+        %we can show how posterior looks for one action but after that let's stay with the generic formulation. Also with the graph - it should definitely be for n. That way it is more professional
 
         The posterior for the after the first action is computed as a simple update of the first posterior shown in equation \ref{eq:firstActionPosterior}.
 
@@ -299,6 +317,7 @@
         \end{multline}
 
         To determine the optimal action we compute the minimum expected entropy of object prediction for the distribution in equation \ref{eq:firstActionPosterior} given by equation \ref{eq:firstActionOptimal}.
+        %TODO: we need more explanation on this. Why expected entropy? why does it work?
 
         \begin{equation}
           \label{eq:firstActionOptimal}
@@ -383,6 +402,7 @@
         \end{table}
 
         Our implementation uses a particle filter for computing the optimal action.
+        % this is not a particle filter stricte but we use MCMC method to approximate distributions. Also, we shouldn't put implementation in.
 
         % include derivations in the appendix
 

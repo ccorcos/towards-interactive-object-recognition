@@ -102,12 +102,15 @@
     % I would try something more like this. let me know what you think... 
     Many state-of-the-art object recognition systems have been developed using a variety of feature extraction techniques. As computer vision matures, it is important to leverage all useful feature extraction techniques together in a single for the best object recognition results. However, static object recognition will always have its limits. Sometimes an object may appear ambiguous with respect to another object, and sometimes distinctive features may hidden due to its pose.  In this paper we present an approach to help tackle both of these problems.
 
-    % the BN
-    We introduce a probabilistic graphical model for combining arbitrary feature extraction techniques into a single object recognition system with the requirement that for any feature type there must be a function given for computing the matching error between two features of the same type. 
+    % % the BN
+    % We introduce a probabilistic graphical model for combining arbitrary feature extraction techniques into a single object recognition system with the requirement that for any feature type there must be a function given for computing the matching error between two features of the same type. 
 
-    % Action prediction
-    This model also learns to recognize object in various poses. With this information, we formulate an approach leveraging robotic manipulation to determine the optimal action for future expected object recognition.  
-% I like the beginning. However after that I think you get too much into the details of how exactly it works. Introduction is supposed to be very broad. I wouldn't mention multiple feature types here.    
+    % % Action prediction
+    % This model also learns to recognize object in various poses. With this information, we formulate an approach leveraging robotic manipulation to determine the optimal action for future expected object recognition.  
+    
+    % KAROL - I like the beginning. However after that I think you get too much into the details of how exactly it works. Introduction is supposed to be very broad. I wouldn't mention multiple feature types here.    
+
+    % CHET - OK. I commented it out. Write something. Or at least give me some bullet points to write on.
     
 
     % OLD INTRO
@@ -167,19 +170,26 @@
     All these approaches do not take into consideration action choices. Actions are assumed to be known and performed either by a human or a robot. In this work we introduce a probabilistic method to choose the best action based on robot's observations. To the best of our knowledge, the problem of interactive object recognition has not been addressed before. 
 
 \section{Approach}
-    This model has two parts. The first part deals only with object recognition and the second part extends this model for determining optimal actions. The object recognition model is a simple discriminative model for predicting object and pose. This model is agnostic of the type of features used so long as there exists some matching function for comparing features of the same type. The action selection part of this model extends the object recognition model in time and determines the optimal actions by the minimum expected entropy of the object predictions across all potential actions. 
-    % it's ok, but I wouldn't emphasize different types of features so much. we mentioned it once already, it's fine. Apart from that, we definitely need to work on language, it has to be much more scientific.
+    Our model consists of an object recognition subgraph extended in time for modelling actions. 
+    % Objects and poses are modelled discriminatively and each feature is modelled as continuous random variable of feature matching error. 
+    This model is agnostic of the type of features used so long a matching error function is defined for comparing features of the same type. Actions are optimally selected based the minimum expected entropy of the object predictions for each potential action.
 
+    % more scientific this time?
+
+    % OLD
+        % This model has two parts. The first part deals only with object recognition and the second part extends this model for determining optimal actions. The object recognition model is a simple discriminative model for predicting object and pose. This model is agnostic of the type of features used so long as there exists some matching function for comparing features of the same type. The action selection part of this model extends the object recognition model in time and determines the optimal actions by the minimum expected entropy of the object predictions across all potential actions. 
+        
     \subsection{Object Recognition Model}
-        The object recognition model predicts an object and a pose based on observed features. Objects and poses are treated discriminatively. This model consists of $N$ objects, $O \in \{o_1,o_2, ..., o_N\}$ in $I$ poses $P \in \{p_1,p_2, ..., p_I\}$ resulting in $K = N \cdot I$ object-pose pairs. There are $M$ features of $J$ types $\set{F} = \{\set{F}^1,\set{F}^2, ..., \set{F}^J\} = \left\{ f_1, ...,  f_M\right\}$. This model assumes features are conditionally independent given object and pose. This model also assumes a uniform prior on the object and pose. Thus, the joint distribution is factorized as in equation \ref{eq:fac} resulting a graph showing in figure \ref{fig:simpleGraph}.
-        %I think there's something wrong with equation on the feature types. I dont get this part: = \left\{ f_1, ...,  f_M\right\  
-        %Also, I wouldn't put the factorization equation here. It's too obvious.
-
-        \begin{equation}
-            \label{eq:fac}
-            \prob{O,P,\set{F}} = \prob{O}\prob{P}\prob{\set{F}|O,P}
-        \end{equation}
-
+        The object recognition subgraph discriminatively predicts object and pose based on observed features. This model consists of $N$ objects, $O \in \{o_1,o_2, ..., o_N\}$ in $I$ poses $P \in \{p_1,p_2, ..., p_I\}$ and 
+        %resulting in $K = N \cdot I$ object-pose pairs. 
+        $M$ features $\set{F} = \left\{ f_1, ...,  f_M\right\}$. 
+        % of $J$ types $\set{F} = \{\set{F}^1,\set{F}^2, ..., \set{F}^J\}$. 
+        This model assumes (1) features are conditionally independent given object and pose, and (2) a uniform prior on the object and pose. The resulting graphical model is shown in \figref{fig:objectRecognitionSubgraph}.
+        % f_m vs f^j confusion
+        % \begin{equation}
+        %     \label{eq:fac}
+        %     \prob{O,P,\set{F}} = \prob{O}\prob{P}\prob{\set{F}|O,P}
+        % \end{equation}
         \begin{figure}[h]
           \centering
           \begin{tikzpicture}
@@ -195,88 +205,66 @@
             \plate {} {(F)} {$M$}
           \end{tikzpicture}
           \caption{Simple object recognition graph.}
-          \label{fig:simpleGraph}
+          \label{fig:objectRecognitionSubgraph}
         \end{figure}
 
-    \subsubsection{Model Construction}
-        Before training this model, we first must construct the structure of this model. We selected a set of objects and chose a number of poses we wanted the model to learn. We gathered a set of features for each object-pose pair in an ideal setting to create an initial dataset.
-        % I would introduce a term here. Like a database for example. So that we can refer to it later.
+        The likelihood of a feature, $\prob{f|o,p}$ is a distribution derived from feature matching errors. Each feature in the model has an associated type $j$ and a value or descriptor with which to compute a similarity or matching error $\cursive{E}^j(\cdot,\cdot)$ with respect to another feature of the same type.
 
-        \begin{equation}
-            \cursive{D} = \left\{ \left(o_k,p_k,\set{F}_k\right)^{k=K}_{k=1} \right\}
-        \end{equation}
-% I think that this indexing with k is confusing. because now it seems that there is k objects.. I know what you want to say. But I think I would even remove this. Also, structure of a model sounds like we want to infer the structure of the graph...
+        The features of this model are selected as the set of all unique features observed in an ideal setting for all objects and poses in the model. 
 
-        The model was constructed as set of all unique objects, poses, and features observed in $\cursive{D}$. % I dont really understand this sentence. What is the model exactly?
+        % OLD
+            % Before training this model, we first must construct the structure of this model. We selected a set of objects and chose a number of poses we wanted the model to learn. We gathered a set of features for each object-pose pair in an ideal setting to create an initial dataset.
+            % % I would introduce a term here. Like a database for example. So that we can refer to it later.
 
-    \subsubsection{Feature Likelihood + Training}
-        The likelihood of a feature, $\prob{f|o,p}$ is a distribution derived from feature matching errors. Each feature in the model has an associated type $j$ and a value or descriptor with which to compute a matching error $\cursive{E}^j(\cdot,\cdot)$ with respect to another feature of the same type. 
+            % \begin{equation}
+            %     \cursive{D} = \left\{ \left(o_k,p_k,\set{F}_k\right)^{k=K}_{k=1} \right\}
+            % \end{equation}
 
-        Given an observed set of features, $\set{F}_{\text{obs}}$, the best matching error with respect to a feature in the model $f^j \in \set{F}$ is given by equation
-         \ref{eq:bestMatch}.
+            % % I think that this indexing with k is confusing. because now it seems that there is k objects.. I know what you want to say. But I think I would even remove this. Also, structure of a model sounds like we want to infer the structure of the graph...
+
+            % The model was constructed as set of all unique objects, poses, and features observed in $\cursive{D}$. % I dont really understand this sentence. What is the model exactly?
+
+        Given an observation, $\set{F}_{\text{obs}}$, the best matching error with respect to a feature in the model $f^j \in \set{F}$ is given by \eqref{eq:bestMatch}.
      	% I put new commands in for referencing equations, figures and so on. Please use those.    
-         %matching, descriptors - these are very SIFT-like terms. I don't think one can understand what we mean by matching now. That's why I would also move away from being so generic and just concentrate on our features. At the end we can mention that it is also extendable to other feature types.
-
+            % matching, descriptors - these are very SIFT-like terms. I don't think one can understand what we mean by matching now. That's why I would also move away from being so generic and just concentrate on our features. At the end we can mention that it is also extendable to other feature types.
         \begin{equation}
             \label{eq:bestMatch}
             \cursive{E}(f^j) = \min_{f^j_{\text{obs}} \in \set{F}_{\text{obs}}}\cursive{E}^j(f^j,f^j_{\text{obs}})
         \end{equation}
-
-        We record a set of training data consisting of $R$ sets of data for each object-pose pair, $k$. We compute a set of best matching errors for each feature in the model across all training samples and learn the distribution of these errors.
-
+        
+        Training data consists of $R$ sets of feature observations for each object-pose pair. The feature likelihood distribution is learned from the distribution of best matching errors across all training observations for a specific object-pose.
+        % We compute a set of best matching errors for each feature in the model across all training samples and learn the distribution of these errors.
         \begin{equation}
             \prob{f|o,p} \sim \{\cursive{E}_1(f), ...,  \cursive{E}_R(f)\}
         \end{equation}
-
-        Note that this procedure is agnostic of the type of feature used. In our case, we used SIFT features and fit the errors with a normal distribution. 
-
+        Note that this procedure works for any type of feature given an error function. This model can also combine multiple feature types into a single object recognition model. For our model, we used only SIFT features and learned a normal distribution for the feature likelihood.   
         \begin{equation}
-            \prob{f_m|o_n,p_i} \sim \cursive{N}(\mu_{m}^{n,i},\sigma_{m}^{n,i})
+            \prob{f|o,p} \sim \cursive{N}(\mu,\sigma)
         \end{equation}
-% I would remove the m index here. It doesnt help much and it's not easily readable
-
-    \subsubsection{Object-Pose Inference}
-
-        The posterior is given by equation \ref{eq:objPosePosterior}.
-
+        % OLD
+            % \begin{equation}
+            %     \prob{f_m|o_n,p_i} \sim \cursive{N}(\mu_{m}^{n,i},\sigma_{m}^{n,i})
+            % \end{equation}
+            % I would remove the m index here. It doesnt help much and it's not easily readable
+        % \subsubsection{Object-Pose Inference}
+        
+        The posterior for predicting object-pose is given by the posterior in \eqref{eq:firstPosterior}.
         \begin{equation}
-            \label{eq:objPosePosterior}
+            \label{eq:firstPosterior}
             \prob{o,p|\set{F}} = \frac{\prob{o,p} \cdot \prob{\set{F}|o,p}}{\prob{\set{F}}}
         \end{equation}
-
-        % We first assume a uniform prior.
-
-        % \begin{equation}
-        %   \prob{o} = \frac{1}{N}
-        % \end{equation}
-        % \begin{equation}
-        %   \prob{p} = \frac{1}{I}
-        % \end{equation}
-        % \begin{equation}
-        %   \prob{o,p} = \frac{1}{K}
-        % \end{equation}
-
-        Assuming a uniform prior on objects and poses, the posterior can then be computed as shown in eqution \ref{eq:objPosePosteriorComp}.
-
+        Based on the assumption that features are conditionally independent given object and pose, the joint feature likelihood can be computed as a product shown in \eqref{eq:setFeatureLikelihood}.
         \begin{equation}
-            \label{eq:objPosePosteriorComp}
+            \label{eq:setFeatureLikelihood}
+            \prob{\set{F}|o,p} = \prod_{m=1}^{M} \prob{f_m|o,p}
+        \end{equation}
+        Assuming a uniform prior on objects and poses, the posterior can then be computed as shown in \eqref{eq:firstPosteriorComputation}.
+        \begin{equation}
+            \label{eq:firstPosteriorComputation}
             \prob{o,p|\set{F}} = \frac{\prob{\set{F}|o,p}}{\sum_{n,i} \prob{\set{F}|o_n,p_i}}
         \end{equation}
-        
-        %I would definitely remove the last equation. We need to write that features are independent given object and a pose and thats why we multiply them.
-
-
     \subsection{Action Selection Model}
-        The action selection model extends the object-recognition model into a time-series model. Actions are modeled as $I$ pairwise relative pose transformations including the \italic{stay} action to determine when the algorithm has converged. The next pose, $P_{t+1}$ is dependent only on the previous pose, $P_t$ and the previous action $A_t$. For our experiment, we consider actions to be deterministic, i.e. $\prob{P_{t+1}|P_t,A_t} \in \{ 0 , 1 \}$.
-
-    \subsubsection{First Action}
-        After initially observing data $\set{F}_1$, we compute the posterior for all object-poses. We consider what is the optimal action $a \in A_1$ which would lead to a new pose $P_2$ and reveal new features $\set{F}_2$. This joint distribution is factorized by equation \ref{eq:firstActionFactorized}, depicted in figure \ref{fig:firstActionGraph}.
-
-        \begin{multline}
-            \label{eq:firstActionFactorized}
-            \prob{O,P_1,P_2,\set{F}_1, \set{F}_2, A_1} = \\ \prob{O}\prob{P_1}\prob{\set{F}_1|O,P}\prob{P_2|P_1|A_1}\prob{\set{F}_2|O,P_2}
-        \end{multline}
-
+        For action selection, we extend the object-recognition subgraph into a time-series graph. Actions are modeled as $I$ pairwise relative pose transformations including the \italic{stay} action to determine when the algorithm has converged. The next pose, $P_{t+1}$ is dependent only on the previous pose, $P_t$ and the previous action $A_t$. This results in a graphical model shown in \figref{fig:fullGraph}.
         \begin{figure}[h]
           \centering
           \begin{tikzpicture}
@@ -300,33 +288,12 @@
             \plate {pf} {(F)} {$M$}
             \plate {pf2} {(F2)} {$M$}
 
-            \plate {} {(F)(P)(A)(pf)} {$t=1$}
-            \plate {} {(F2)(P2)(A2)(pf2)} {$t=2$}
-
+            \plate {} {(F)(P)(A)(pf)} {$t=0$}
+            \plate {} {(F2)(P2)(A2)(pf2)} {$t+1$}
           \end{tikzpicture}
-          \label{fig:firstActionGraph}
-          \caption{First action model}
+          \caption{graph model}
+          \label{fig:fullGraph}
         \end{figure}
-        %we can show how posterior looks for one action but after that let's stay with the generic formulation. Also with the graph - it should definitely be for n. That way it is more professional
-
-        The posterior for the after the first action is computed as a simple update of the first posterior shown in equation \ref{eq:firstActionPosterior}.
-
-        \begin{multline}
-          \label{eq:firstActionPosterior}
-          \prob{o|\set{F}_1,\set{F}_2,a} = \\ \frac{\sum_{P_1,P_2} \prob{o,P_1|\set{F}_1} \; \prob{\set{F}_2|P_2,o} \; \prob{P_2|P_1,a}}{\sum_{P_1,P_2,O} \prob{O,P_1|\set{F}_1} \; \prob{\set{F}_2|P_2,O} \; \prob{P_2|P_1,a}}
-        \end{multline}
-
-        To determine the optimal action we compute the minimum expected entropy of object prediction for the distribution in equation \ref{eq:firstActionPosterior} given by equation \ref{eq:firstActionOptimal}.
-        %TODO: we need more explanation on this. Why expected entropy? why does it work?
-
-        \begin{equation}
-          \label{eq:firstActionOptimal}
-          a^* = \argmin_{A_1} \expectedValue{\entropy{O|\set{F}_1,\set{F}_2,A_1}}{\set{F}_2 \sim \prob{\set{F_2}|\set{F}_1,A_1}}
-        \end{equation}
-
-    \subsubsection{Generalized Optimal Action}
-        Determining the optimal action at time $t$ is easily generalized from equation \ref{eq:firstActionPosterior}.
-
         % \begin{figure}[h]
         %   \centering
         %   \begin{tikzpicture}
@@ -368,41 +335,78 @@
         %   \label{fig:fullGraph}
         % \end{figure}
 
+        % \subsubsection{First Action}
+        % After initially observing data $\set{F}_1$, we compute the posterior for all object-poses. We consider what is the optimal action $a \in A_1$ which would lead to a new pose $P_2$ and reveal new features $\set{F}_2$. This joint distribution is factorized by equation \ref{eq:firstActionFactorized}, depicted in figure \ref{fig:firstActionGraph}.
+
+        % \begin{multline}
+        %     \label{eq:firstActionFactorized}
+        %     \prob{O,P_1,P_2,\set{F}_1, \set{F}_2, A_1} = \\ \prob{O}\prob{P_1}\prob{\set{F}_1|O,P}\prob{P_2|P_1|A_1}\prob{\set{F}_2|O,P_2}
+        % \end{multline}
+
+        %we can show how posterior looks for one action but after that let's stay with the generic formulation. Also with the graph - it should definitely be for n. That way it is more professional
+
+        % The posterior for the after the first action is computed as a simple update of the first posterior shown in equation \ref{eq:firstActionPosterior}.
+
+        % \begin{multline}
+        %   \label{eq:firstActionPosterior}
+        %   \prob{o|\set{F}_1,\set{F}_2,a} = \\ \frac{\sum_{P_1,P_2} \prob{o,P_1|\set{F}_1} \; \prob{\set{F}_2|P_2,o} \; \prob{P_2|P_1,a}}{\sum_{P_1,P_2,O} \prob{O,P_1|\set{F}_1} \; \prob{\set{F}_2|P_2,O} \; \prob{P_2|P_1,a}}
+        % \end{multline}
+
+        % To determine the optimal action we compute the minimum expected entropy of object prediction for the distribution in equation \ref{eq:firstActionPosterior} given by equation \ref{eq:firstActionOptimal}.
+        %TODO: we need more explanation on this. Why expected entropy? why does it work?
+
+        % \begin{equation}
+        %   \label{eq:firstActionOptimal}
+        %   a^* = \argmin_{A_1} \expectedValue{\entropy{O|\set{F}_1,\set{F}_2,A_1}}{\set{F}_2 \sim \prob{\set{F_2}|\set{F}_1,A_1}}
+        % \end{equation}
+
+        % \subsubsection{Generalized Optimal Action}
+        
+        The posterior at time $t+1$ given the entire history of observations and actions is simply a Bayesian update of the posterior at time $t$ given in \eqref{eq:fullPosterior}.
         \begin{multline}
             \label{eq:fullPosterior}
-            \prob{o,P_{t+1}|\set{F}_{1:t+1},A_{1:t}} = \\ \frac{ \sum_{P_t} \prob{o,P_t|\set{F}_{1:t},A_{1:t-1}} \prob{\set{F}_{t+1}|o,P_{t+1}} \prob{P_{t+1}|P_t,A_t}}{\sum_{P_t,P_{t+1},O} \prob{o,P_t|\set{F}_{1:t},A_{1:t-1}} \prob{\set{F}_{t+1}|o,P_{t+1}} \prob{P_{t+1}|P_t,A_t}}
+            \prob{o,P_{t+1}|\set{F}_{1:t+1},A_{1:t}} = \\ \frac{ \sum_{P_t} \prob{o,P_t|\set{F}_{1:t},A_{1:t-1}} \prob{\set{F}_{t+1}|o,P_{t+1}} \prob{P_{t+1}|P_t,A_t}}{\sum_{P_t,P_{t+1},O} \prob{O,P_t|\set{F}_{1:t},A_{1:t-1}} \prob{\set{F}_{t+1}|O,P_{t+1}} \prob{P_{t+1}|P_t,A_t}}
         \end{multline}
-
+        For our experiment, we consider actions to be perfect, i.e. $\prob{P_{t+1}|P_t,A_t} \in \{ 0 , 1 \}$. Thus, given an action and a pose, the next pose can be computed deterministically. This simplifies our Bayesian update to \eqref{eq:fullPosteriorSimplified}.
+        \begin{multline}
+            \label{eq:fullPosteriorSimplified}
+            \prob{o,P_{t+1}|\set{F}_{1:t+1},A_{1:t}} = \\ \frac{\prob{o,P_t|\set{F}_{1:t},A_{1:t-1}} \prob{\set{F}_{t+1}|o,P_{t+1}} }{\sum_{P_t,O} \prob{O,P_t|\set{F}_{1:t},A_{1:t-1}} \prob{\set{F}_{t+1}|O,P_{t+1}} }
+        \end{multline}
+        
+        We defined the optimal action as moving an object into the least ambiguous pose resulting in a minimum entropy across predicted object probabilities. The posterior object probability $\prob{o|\set{F}_{1:t+1},A_{1:t}}$ is a distribution because we have not observed $\set{F}_{t+1}$. Thus, we minimize the \italic{expected} entropy of this posterior for all potential actions given by \eqref{eq:optimalAction}.
         \begin{equation}
+            \label{eq:optimalAction}
             a^* = \argmin_{A_t} \expectedValue{ \entropy{O|\set{F}_{1:t+1},A_{1:t}} }{\set{F}_{t+1} \sim \prob{\set{F_{t+1}}|\set{F}_{1:t},A_{1:t}}}
         \end{equation}
+        That can be efficiently computed with a particle filter approximate sampling method.
 
-        \subsubsection{Implementation}
+        % OLD
+            % \subsubsection{Implementation}
 
-        This algorithm follows a simple posterior update rule
-        \begin{align}
-            \text{posterior}_t &= \frac{\text{posterior}_{t-1}*\text{likelihood}_t}{\text{evidence}_t}\\
-            &= \frac{\text{posterior}_{t-1}*\text{likelihood}_t}{\sum \text{posterior}_{t-1}*\text{likelihood}_t}
-        \end{align}
+            % This algorithm follows a simple posterior update rule
+            % \begin{align}
+            %     \text{posterior}_t &= \frac{\text{posterior}_{t-1}*\text{likelihood}_t}{\text{evidence}_t}\\
+            %     &= \frac{\text{posterior}_{t-1}*\text{likelihood}_t}{\sum \text{posterior}_{t-1}*\text{likelihood}_t}
+            % \end{align}
 
-        \begin{table}[h]
-          \begin{tabular}{c|c|c|c} % number of columns and vertical lines
-            \hline % top horizontal line
-            Time & Posterior & Evidence & Likelihood\\
-            [0.5ex] % [0.5ex] adds vertical space
-            \hline\hline % inserts double-line
-            0 & $\prob{o,p}$ & & \\[0.5ex] 
-            1 & $\prob{o,p|\set{F}_1}$ & $\prob{\set{F}_1}$ & $\prob{\set{F}_1|o,p}$ \\[0.5ex] 
-            2 & $\prob{o,p|\set{F}_1,\set{F}_2,A_1}$ & $\prob{\set{F}_2|\set{F}_1,A_1}$ & $\prob{\set{F}_2|o,p}$ \\
-            ...&...&...&...\\[0.5ex] 
-            t & $\prob{o,p|\set{F}_{1:t},A_{1:t-1}}$ & $\prob{\set{F}_t|\set{F}_{1:t-1},A_{1:t-1}}$ & $\prob{\set{F}_t|o,p}$
-          \end{tabular}
-          % \label{tab:updateRule}
-          % \caption{Update cache}
-        \end{table}
+            % \begin{table}[h]
+            %   \begin{tabular}{c|c|c|c} % number of columns and vertical lines
+            %     \hline % top horizontal line
+            %     Time & Posterior & Evidence & Likelihood\\
+            %     [0.5ex] % [0.5ex] adds vertical space
+            %     \hline\hline % inserts double-line
+            %     0 & $\prob{o,p}$ & & \\[0.5ex] 
+            %     1 & $\prob{o,p|\set{F}_1}$ & $\prob{\set{F}_1}$ & $\prob{\set{F}_1|o,p}$ \\[0.5ex] 
+            %     2 & $\prob{o,p|\set{F}_1,\set{F}_2,A_1}$ & $\prob{\set{F}_2|\set{F}_1,A_1}$ & $\prob{\set{F}_2|o,p}$ \\
+            %     ...&...&...&...\\[0.5ex] 
+            %     t & $\prob{o,p|\set{F}_{1:t},A_{1:t-1}}$ & $\prob{\set{F}_t|\set{F}_{1:t-1},A_{1:t-1}}$ & $\prob{\set{F}_t|o,p}$
+            %   \end{tabular}
+            %   % \label{tab:updateRule}
+            %   % \caption{Update cache}
+            % \end{table}
 
-        Our implementation uses a particle filter for computing the optimal action.
-        % this is not a particle filter stricte but we use MCMC method to approximate distributions. Also, we shouldn't put implementation in.
+            % Our implementation uses a particle filter for computing the optimal action.
+            % this is not a particle filter stricte but we use MCMC method to approximate distributions. Also, we shouldn't put implementation in.
 
         % include derivations in the appendix
 

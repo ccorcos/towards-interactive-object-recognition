@@ -83,7 +83,7 @@
     \maketitle
 
 \begin{abstract}
-    The abstract goes here.
+    This paper starts with a probabilitic Bayesian Network approach to predict objects and poses for any variety of extracted features. This basic object recognition model is extended to incorporate actions over time. An optimal solution is derived for determining the best action for expected object recognition in future predictions.   
 \end{abstract}
 
 \IEEEpeerreviewmaketitle
@@ -94,12 +94,22 @@
     %* introduce the idea
     %* contributions?
 
-    % problem of static object recognition
-    Although multiple successful state-of-the-art object recognition systems have been developed, we still cannot say that the problem of object recognition has been solved.
-    We claim that the reason for that is already included in the problem formulation. Given static images there are cases where it is impossible to recognize the object simply because of lack of distinctive features (see~\figref{fig:pr2}). One way to overcome this problem has been presented in the area of object segmentation where robot-objects interaction was introduced. 
+    % I would try something more like this. let me know what you think... 
+    Many state-of-the-art object recognition systems have been developed using a variety of feature extraction techniques. As computer vision matures, it is important to leverage all useful feature extraction techniques together in a single for the best object recognition results. However, static object recognition will always have its limits. Sometimes an object may appear ambigious with respect to another object, and sometimes distinctive features may hidden due to its pose.  We have developed an approach to help tackle both of these problems.
 
-    % introduce the idea
-    In this work we take advantage of robot's manipulation capabilities and apply them in the domain of object recognition. In our approach we tackle interactive object recognition problem where we look for the action that will minimize the expected entropy over objects distribution. Therefore we want to be optimal in the number of actions that will lead us to successful object recognition.
+    % the BN
+    We introduce a probabilistic graphical model for combining arbitrary feature extraction techniques into a single object recognition system with the requirement that for any feature type there must be a function given for computing the matching error between two features of the same type. 
+
+    % Action prediction
+    This model also learns to recognize object in various poses. With this information, we formulate an approach leveraging robotic manipulation to determine the optimal action for future expected object recognition.  
+
+    % OLD INTRO
+        % % problem of static object recognition
+        % Although multiple successful state-of-the-art object recognition systems have been developed, we still cannot say that the problem of object recognition has been solved.
+        % We claim that the reason for that is already included in the problem formulation. Given static images there are cases where it is impossible to recognize the object simply because of lack of distinctive features (see~\figref{fig:pr2}). One way to overcome this problem has been presented in the area of object segmentation where robot-objects interaction was introduced. 
+
+        % % introduce the idea
+        % In this work we take advantage of robot's manipulation capabilities and apply them in the domain of object recognition. In our approach we tackle interactive object recognition problem where we look for the action that will minimize the expected entropy over objects distribution. Therefore we want to be optimal in the number of actions that will lead us to successful object recognition.
 
     \setlength{\tabcolsep}{0.1em}
     \begin{figure}[ht]

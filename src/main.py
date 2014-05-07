@@ -90,23 +90,87 @@ def main():
     # plotObjPoseTrainingDistributions(together=False)
 
     # PLOT CROSS VALIDATION
-    # plotCrossValPosteriors()
+    plotCrossValPosteriors()
 
     # PLOT TEST DATA
     # plotTestPosteriors(testFile)
 
     # OPTIMAL ACTION SELECTION
-    pr(0, "Optimal Action Selection")
-    test1 = crossValErrors[0, 0,:, 18]
-    # test = importTestData(testFile)
-    # test1 = test[:, 0]
-    pr(1, "observing first observation")
-    observe(test1)
-    plotPosteriors_op(1)
-    wait()
-    a = optimalAction(1)
+    # pr(0, "Optimal Action Selection")
+    # test1 = crossValErrors[0, 0,:, 18]
+    # # test = importTestData(testFile)
+    # # test1 = test[:, 0]
+    # pr(1, "observing first observation")
+    # observe(test1)
+    # plotPosteriors_op(1)
+    # wait()
+    # a = optimalAction(1)
 
-    pr(0, "finished")
+    # # TRAINING ERRORS
+    # pr(0, "Computing Training Errors")
+    # training = {}
+    # for idxObject in range(N):
+    #     training[objects[idxObject]] = {}
+    #     for idxPose in range(I):
+    #         err = []
+    #         for idxSample in range(R):
+    #             observe(trainingErrors[idxObject, idxPose, :, idxSample])
+    #             p = posteriors_op(1)
+    #             best = unravel_index(argmax(p), p.shape)
+    #             if best[0] == idxObject and best[1] == idxPose:
+    #                 err.append(1)
+    #             else:
+    #                 err.append(0)
+    #             clearHistory()
+    #         training[objects[idxObject]][poses[idxPose]] = mean(err)
+    #         pr(1,'training', objects[idxObject], poses[idxPose], 'error:', mean(err))
+
+    # pr(100, training)
+
+    # # CROSS VALIDATION ERRORS
+    # pr(0, "Computing Cross Validation Errors")
+    # xval = {}
+    # for idxObject in range(N):
+    #     xval[objects[idxObject]] = {}
+    #     for idxPose in range(I):
+    #         err = []
+    #         for idxSample in range(Rx):
+    #             observe(crossValErrors[idxObject, idxPose, :, idxSample])
+    #             p = posteriors_op(1)
+    #             best = unravel_index(argmax(p), p.shape)
+    #             if best[0] == idxObject and best[1] == idxPose:
+    #                 err.append(1)
+    #             else:
+    #                 err.append(0)
+    #             clearHistory()
+    #         xval[objects[idxObject]][poses[idxPose]] = mean(err)
+    #         pr(1,'xval', objects[idxObject], poses[idxPose], 'error:', mean(err))
+    
+    # pr(100, xval)
+
+    # # EXPERIMENT
+    # obj = 0
+    # pose = 0
+    # pr(0, "Experiment")
+    # pr(1, "Observing", objects[obj], poses[pose]) 
+    # observe(crossValErrors[obj, pose,:, 0])
+    # plotPosteriors_op(1)
+    # # p = posteriors_op(1)
+    # # best = unravel_index(argmax(p), p.shape)
+    # a = optimalAction(1)
+    # actionHistory.append(a)
+    # idxPose = pose2idx(nextPose(poses[pose], a))
+    # pr(1, "Observing", objects[obj], poses[idxPose]) 
+    # observe(crossValErrors[obj, idxPose,:, 1])
+    # plotPosteriors_op(2)
+    # a = optimalAction(2)
+    # actionHistory.append(a)
+    # idxPose = pose2idx(nextPose(poses[idxPose], a))
+    # pr(1, "Observing", objects[obj], poses[idxPose]) 
+    # observe(crossValErrors[obj, idxPose,:, 2])
+    # plotPosteriors_op(3)
+    # a = optimalAction(3)
+    # pr(0, "finished")
 
 
 # ----------------------------------------------------------
@@ -442,7 +506,7 @@ def logPosterior_op(idxObservation, idxObject, idxPose):
         previousPoseIdx = prevPoseIdx(idxPose,
                                       previousActionIdx)
 
-        lastPosterior = logPosterior_op(idxObservation - 1,
+        logLastPosterior = logPosterior_op(idxObservation - 1,
                                         idxObject,
                                         previousPoseIdx)
 
@@ -452,7 +516,7 @@ def logPosterior_op(idxObservation, idxObject, idxPose):
 
         thisLogEvidence = logEvidence(idxObservation)
 
-        return logPrior + thisLogLikelihood - thisLogEvidence
+        return logLastPosterior + thisLogLikelihood - thisLogEvidence
 
 
 @memoize
@@ -512,7 +576,7 @@ def logEvidence(idxObservation):
                                                   idxObject,
                                                   idxPose)
 
-                logTerms.append(thisLogLikelihood + logPrior)
+                logTerms.append(thisLogLikelihood + logLastPosterior)
 
     return logOfSumGivenLogs(logTerms)
 
@@ -613,7 +677,7 @@ def particle_logPosterior_op(idxObservation, idxObject, idxPose, idxParticle, pr
     else:
         previousPoseIdx = prevPoseIdx(idxPose,
                                       previousActionIdx)
-        lastPosterior = logPosterior_op(idxObservation - 1,
+        logLastPosterior = logPosterior_op(idxObservation - 1,
                                         idxObject,
                                         previousPoseIdx)
         thisLogLikelihood = particle_logLikelihood(idxObservation,
@@ -623,7 +687,7 @@ def particle_logPosterior_op(idxObservation, idxObject, idxPose, idxParticle, pr
                                                    previousActionIdx)
         thisLogEvidence = particle_logEvidence(
             idxObservation, idxParticle, previousActionIdx)
-        return lastPosterior + thisLogLikelihood - thisLogEvidence
+        return logLastPosterior + thisLogLikelihood - thisLogEvidence
 
 
 @memoize

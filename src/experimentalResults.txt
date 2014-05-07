@@ -1,0 +1,133 @@
+actions = ['stay', 'rotate', 'flip', 'flip-rotate']
+
+==============================================================================
+================= PGM for Optimal Actions in Computer Vision =================
+==============================================================================
+
+ - importing feature errors from MODEL_SIFT_STANDARD_FULL_MIX.txt
+   * N objects: 4
+      [first_home_book,
+       first_home_sticker_book,
+       math_principles_book,
+       math_principles_sticker_book]
+   * I poses: 4
+      [down, down-spine, up-spine, up]
+   * M features: 582
+   * Re samples: 98
+   * R for training: 78
+   * Rx for cross-val: 20
+
+==============================================================================
+========================= Computing Training Errors ==========================
+==============================================================================
+
+ - training first_home_book down error: 1.0
+ - training first_home_book down-spine error: 1.0
+ - training first_home_book up-spine error: 0.98717948717948723
+ - training first_home_book up error: 1.0
+ - training first_home_sticker_book down error: 0.0
+ - training first_home_sticker_book down-spine error: 0.0
+ - training first_home_sticker_book up-spine error: 1.0
+ - training first_home_sticker_book up error: 1.0
+ - training math_principles_book down error: 0.96153846153846156
+ - training math_principles_book down-spine error: 1.0
+ - training math_principles_book up-spine error: 0.98717948717948723
+ - training math_principles_book up error: 1.0
+ - training math_principles_sticker_book down error: 0.0
+ - training math_principles_sticker_book down-spine error: 0.0
+ - training math_principles_sticker_book up-spine error: 1.0
+ - training math_principles_sticker_book up error: 1.0
+      {first_home_book: {down: 1.0,
+                           down-spine: 1.0,
+                           up: 1.0,
+                           up-spine: 0.98717948717948723},
+       first_home_sticker_book: {down: 0.0,
+                                   down-spine: 0.0,
+                                   up: 1.0,
+                                   up-spine: 1.0},
+       math_principles_book: {down: 0.96153846153846156,
+                                down-spine: 1.0,
+                                up: 1.0,
+                                up-spine: 0.98717948717948723},
+       math_principles_sticker_book: {down: 0.0,
+                                        down-spine: 0.0,
+                                        up: 1.0,
+                                        up-spine: 1.0}}
+
+==============================================================================
+===================== Computing Cross Validation Errors ======================
+==============================================================================
+
+ - xval first_home_book down error: 0.90000000000000002
+ - xval first_home_book down-spine error: 1.0
+ - xval first_home_book up-spine error: 1.0
+ - xval first_home_book up error: 1.0
+ - xval first_home_sticker_book down error: 0.0
+ - xval first_home_sticker_book down-spine error: 0.0
+ - xval first_home_sticker_book up-spine error: 1.0
+ - xval first_home_sticker_book up error: 1.0
+ - xval math_principles_book down error: 0.84999999999999998
+ - xval math_principles_book down-spine error: 1.0
+ - xval math_principles_book up-spine error: 0.84999999999999998
+ - xval math_principles_book up error: 0.65000000000000002
+ - xval math_principles_sticker_book down error: 0.0
+ - xval math_principles_sticker_book down-spine error: 0.0
+ - xval math_principles_sticker_book up-spine error: 1.0
+ - xval math_principles_sticker_book up error: 1.0
+      {first_home_book: {down: 0.90000000000000002,
+                           down-spine: 1.0,
+                           up: 1.0,
+                           up-spine: 1.0},
+       first_home_sticker_book: {down: 0.0,
+                                   down-spine: 0.0,
+                                   up: 1.0,
+                                   up-spine: 1.0},
+       math_principles_book: {down: 0.84999999999999998,
+                                down-spine: 1.0,
+                                up: 0.65000000000000002,
+                                up-spine: 0.84999999999999998},
+       math_principles_sticker_book: {down: 0.0,
+                                        down-spine: 0.0,
+                                        up: 1.0,
+                                        up-spine: 1.0}}
+
+==============================================================================
+================================= Experiment =================================
+==============================================================================
+
+ - Observing first_home_book down
+ - plotting object-pose posteriors for obs 1
+ - Generating 160 samples of the evidence distribution
+   * idxObservation: 2
+   * idxAction: 0
+ - Generating 160 samples of the evidence distribution
+   * idxObservation: 2
+   * idxAction: 1
+ - Generating 160 samples of the evidence distribution
+   * idxObservation: 2
+   * idxAction: 2
+ - Generating 160 samples of the evidence distribution
+   * idxObservation: 2
+   * idxAction: 3
+ - Expected entropy for each action:
+   * [0.69314718056000024, 0.69314718056000024, 0.0, 0.0]
+ - The optimal action is flip
+ - Observing first_home_book up
+ - plotting object-pose posteriors for obs 2
+ - Generating 160 samples of the evidence distribution
+   * idxObservation: 3
+   * idxAction: 0
+ - Generating 160 samples of the evidence distribution
+   * idxObservation: 3
+   * idxAction: 1
+ - Generating 160 samples of the evidence distribution
+   * idxObservation: 3
+   * idxAction: 2
+ - Generating 160 samples of the evidence distribution
+   * idxObservation: 3
+   * idxAction: 3
+ - Expected entropy for each action:
+   * [0.0, 0.0, 0.0, 0.0]
+ - The optimal action is stay
+ - Observing first_home_book up
+ - plotting object-pose posteriors for obs 3

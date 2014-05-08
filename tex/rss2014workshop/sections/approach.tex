@@ -27,7 +27,7 @@
                 % Plates
                 \plate {} {(F)} {$M$}
               \end{tikzpicture}
-              \caption{A simple object-recognition graphical model.}
+              \caption{Subgraph representing a probabilistic graphical model for object recognition.}
               \label{fig:objectRecognitionSubgraph}
             \end{figure}
 
@@ -59,37 +59,7 @@
         \subsubsection{Action Selection}
             To model actions, the object-recognition subgraph is extended into a time-series graph. Actions are modeled as $I$ pairwise relative pose transformations including the \italic{stay} action to determine when the algorithm has converged. The next pose, $P_{t+1}$ is dependent only on the previous pose, $P_t$ and the previous action $A_t$. This results in a graphical model shown in \figref{fig:fullGraph}.
             
-            % First Action
-                % \begin{figure}[h]
-                %   \centering
-                %   \begin{tikzpicture}
-                %     % Define nodes
-                %     \node[obs] (F) {$\set{F}_1$};
-                %     \node[latent, above=of F]  (P) {$P_1$};
-                %     \node[latent, left=of P, xshift=-1.5cm] (O) {$O$};
-                %     \node[obs, above=of P]  (A) {$A_1$};
-
-                %     \node[latent, right=of F, xshift=1.5cm] (F2) {$\set{F}_2$};
-                %     \node[latent, above=of F2]  (P2) {$P_2$};
-                %     \node[latent, above=of P2]  (A2) {$A_2$};
-
-
-                %     % Connect the nodes
-                %     \edge {P,O} {F};
-                %     \edge {P2,O} {F2};
-                %     \edge {P,A} {P2};
-
-                %     % Plates
-                %     \plate {pf} {(F)} {$M$}
-                %     \plate {pf2} {(F2)} {$M$}
-
-                %     \plate {} {(F)(P)(A)(pf)} {$t=0$}
-                %     \plate {} {(F2)(P2)(A2)(pf2)} {$t+1$}
-                %   \end{tikzpicture}
-                %   \caption{Graph model for selecting the first action.}
-                %   \label{fig:firstActionGraph}
-                % \end{figure}
-
+           
                 % After initially observing data $\set{F}_1$, we compute the posterior for all object-poses. We consider what is the optimal action $a \in A_1$ which would lead to a new pose $P_2$ and reveal new features $\set{F}_2$. This joint distribution is factorized by equation \ref{eq:firstActionFactorized}, depicted in figure \ref{fig:firstActionGraph}.
 
                 % \begin{multline}
@@ -97,18 +67,12 @@
                 %     \prob{O,P_1,P_2,\set{F}_1, \set{F}_2, A_1} = \\ \prob{O}\prob{P_1}\prob{\set{F}_1|O,P}\prob{P_2|P_1|A_1}\prob{\set{F}_2|O,P_2}
                 % \end{multline}
 
-                %we can show how posterior looks for one action but after that let's stay with the generic formulation. Also with the graph - it should definitely be for n. That way it is more professional
+               
 
-                % The posterior for the after the first action is computed as a simple update of the first posterior shown in equation \ref{eq:firstActionPosterior}.
-
-                % \begin{multline}
-                %   \label{eq:firstActionPosterior}
-                %   \prob{o|\set{F}_1,\set{F}_2,a} = \\ \frac{\sum_{P_1,P_2} \prob{o,P_1|\set{F}_1} \; \prob{\set{F}_2|P_2,o} \; \prob{P_2|P_1,a}}{\sum_{P_1,P_2,O} \prob{O,P_1|\set{F}_1} \; \prob{\set{F}_2|P_2,O} \; \prob{P_2|P_1,a}}
-                % \end{multline}
+               
 
                 % To determine the optimal action we compute the minimum expected entropy of object prediction for the distribution in equation \ref{eq:firstActionPosterior} given by equation \ref{eq:firstActionOptimal}.
-                %TODO: we need more explanation on this. Why expected entropy? why does it work?
-
+              
                 % \begin{equation}
                 %   \label{eq:firstActionOptimal}
                 %   a^* = \argmin_{A_1} \expectedValue{\entropy{O|\set{F}_1,\set{F}_2,A_1}}{\set{F}_2 \sim \prob{\set{F_2}|\set{F}_1,A_1}}
@@ -151,7 +115,7 @@
 
                     % \draw [dotted, thick, scale=0.6] (7.5,1.5) -- (7.85,1.5);
                 \end{tikzpicture}
-                \caption{Full graph for object recognition with actions.}
+                \caption{Full probabilistic graphical model for object recognition that incorporates actions.}
                 \label{fig:fullGraph}
             \end{figure}
             

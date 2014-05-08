@@ -8,7 +8,7 @@ LATEX    = $(ENV) latex
 DVIPS    = dvips
 PDFLATEX = $(ENV) pdflatex
 
-INCLUDES = 
+INCLUDES = abstract.tex commands.tex coverPage.tex sections/acknowledgments.tex sections/approach.tex sections/conclusion.tex sections/relatedWork.tex sections/approach2.tex sections/bibliography.tex sections/introduction.tex sections/results.tex
 
 default: pdf
 

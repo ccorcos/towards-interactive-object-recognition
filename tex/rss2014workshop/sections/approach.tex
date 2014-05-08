@@ -116,18 +116,18 @@
 
             \begin{figure}[h]
                 \centering
-                \begin{tikzpicture}
+                \begin{tikzpicture}[scale=0.6, every node/.style={scale=0.6}]
                     % Define nodes
-                    \node[obs] (F) {$\set{F}_1$};
+                    \node[obs] (F) {$f_1$};
                     \node[latent, above=of F]  (P) {$P_1$};
                     \node[latent, left=of P, xshift=-1.5cm] (O) {$O$};
                     \node[obs, above=of P]  (A) {$A_1$};
 
-                    \node[obs, right=of F, xshift=1.5cm] (F2) {$\set{F}_2$};
+                    \node[obs, right=of F, xshift=1.5cm] (F2) {$f_2$};
                     \node[latent, above=of F2]  (P2) {$P_2$};
                     \node[obs, above=of P2]  (A2) {$A_2$};
 
-                    \node[latent, right=of F2, xshift=1.5cm] (F3) {$\set{F}_3$};
+                    \node[latent, right=of F2, xshift=1.5cm] (F3) {$f_3$};
                     \node[latent, above=of F3]  (P3) {$P_3$};
                     \node[latent, above=of P3]  (A3) {$A_3$};
 
@@ -149,25 +149,29 @@
                     \plate {} {(F2)(A2)(pf2)} {$t=2$}
                     \plate {} {(F3)(A3)(pf3)} {$t+1$}
 
-                    \draw [dotted, thick] (7.5,1.5) -- (7.85,1.5);
+                    % \draw [dotted, thick, scale=0.6] (7.5,1.5) -- (7.85,1.5);
                 \end{tikzpicture}
                 \caption{Full graph for object recognition with actions.}
                 \label{fig:fullGraph}
             \end{figure}
             
             The posterior at time $t+1$ given the entire history of observations and actions is simply a Bayesian update of the posterior at time $t$ given in \eqref{eq:fullPosterior}.
+            {\small
             \begin{multline}
                 \label{eq:fullPosterior}
                 \prob{o,P_{t+1}|\set{F}_{1:t+1},A_{1:t}} = \\ \frac{ \sum_{P_t} \prob{o,P_t|\set{F}_{1:t},A_{1:t-1}} \prob{\set{F}_{t+1}|o,P_{t+1}} \prob{P_{t+1}|P_t,A_t}}{\sum_{P_t,P_{t+1},O} \prob{O,P_t|\set{F}_{1:t},A_{1:t-1}} \prob{\set{F}_{t+1}|O,P_{t+1}} \prob{P_{t+1}|P_t,A_t}}
             \end{multline}
+            }
             
             We define the optimal action for object recognition as moving the object into the least ambiguous pose. This results in a minimum entropy of the distribution of posterior object prediction probabilities. 
 
             Because we have not yet observed $\set{F}_{t+1}$, we must compute the \italic{expected} entropy of the posterior in \eqref{eq:fullPosterior}. The optimal action is selected as the action which minimizes the expected entropy of object prediction posteriors across all potential actions defined by \eqref{eq:optimalAction}.
+            {\small
             \begin{equation}
                 \label{eq:optimalAction}
                 a^* = \argmin_{A_t} \expectedValue{ \entropy{O|\set{F}_{1:t+1},A_{1:t}} }{\set{F}_{t+1} \sim \prob{\set{F_{t+1}}|\set{F}_{1:t},A_{1:t}}}
             \end{equation}
+            }
             
     \subsection{Implementation}
 
@@ -196,10 +200,12 @@
             \end{equation}
 
             In our experiment, we consider actions to be perfect, i.e. $\prob{P_{t+1}|P_t,A_t} \in \{ 0 , 1 \}$. Thus, given an action and a pose, the next pose can be computed deterministically. This simplifies our Bayesian update from \eqref{eq:fullPosterior} to \eqref{eq:fullPosteriorSimplified}.
+            {\small
             \begin{multline}
                 \label{eq:fullPosteriorSimplified}
-                \prob{o,P_{t+1}|\set{F}_{1:t+1},A_{1:t}} = \frac{\prob{o,P_t|\set{F}_{1:t},A_{1:t-1}} \prob{\set{F}_{t+1}|o,P_{t+1}} }{\sum_{P_t,O} \prob{O,P_t|\set{F}_{1:t},A_{1:t-1}} \prob{\set{F}_{t+1}|O,P_{t+1}} }
+                \prob{o,P_{t+1}|\set{F}_{1:t+1},A_{1:t}} = \\ \frac{\prob{o,P_t|\set{F}_{1:t},A_{1:t-1}} \prob{\set{F}_{t+1}|o,P_{t+1}} }{\sum_{P_t,O} \prob{O,P_t|\set{F}_{1:t},A_{1:t-1}} \prob{\set{F}_{t+1}|O,P_{t+1}} }
             \end{multline}
+            }
 
             This algorithm follows a simple posterior update procedure.
             \begin{align}
@@ -231,17 +237,21 @@
 
                 First, the evidence distribution given in \eqref{eq:evidenceDistribution} is sampled.
 
-                \begin{equation}
+                {\small
+                \begin{multline}
                     \label{eq:evidenceDistribution}
-                    \prob{\set{F}_{t+1}|\set{F}_{1:t}, A_{1:t}} = \sum_{P_t,P_{t+1},O} \prob{O,P_t|\set{F}_{1:t},A_{1:t-1}} \prob{\set{F}_{t+1}|O,P_{t+1}} \prob{P_{t+1}|P_t,A_t}
-                \end{equation}
+                    \prob{\set{F}_{t+1}|\set{F}_{1:t}, A_{1:t}} = \\ \sum_{P_t,P_{t+1},O} \prob{O,P_t|\set{F}_{1:t},A_{1:t-1}} \prob{\set{F}_{t+1}|O,P_{t+1}} \prob{P_{t+1}|P_t,A_t}
+                \end{multline}
+                }
 
                 Because actions are deterministic, this simplfies to \eqref{eq:evidenceDistributionSimplified}.
 
+                {\small
                 \begin{equation}
                     \label{eq:evidenceDistributionSimplified}
                     \prob{\set{F}_{t+1}|\set{F}_{1:t}, A_{1:t}} = \sum_{P_t,O} \prob{O,P_t|\set{F}_{1:t},A_{1:t-1}} \prob{\set{F}_{t+1}|O,P_{t+1}}
                 \end{equation}
+                }
 
                 This distribution can be sampled trivially by first sampling object-poses based on the distribution defined by the previous posterior, $\prob{O,P_t|\set{F}_{1:t},A_{1:t-1}}$. Then, for each sampled object-pose, a particle representing a potential next observation is sampled from the feature likelihood distribution $\prob{\set{F}_{t+1}|O,P_{t+1}}$. Note that $P_{t+1}$ is computed deterministically.
 

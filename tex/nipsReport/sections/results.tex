@@ -1,0 +1,44 @@
+\section{Experimental results}
+
+    We evaluated the proposed approach on a dataset consisting of 4 books, two of which looking the same from the back. Each book was trained in 4 discrete poses being: cover up with visible spine, cover up with no visible spine, cover down with visible spine and cover down with no visible spine. For each object-pose pair we extracted approximately 50 SIFT features which are later used for feature matching. We took 100 training images of each object-pose pair to learn the distribution ADD EQ REF. For the ambiguous case (the book looks the same from the cover down pose) we use the same training images as the books look the same from that side.
+
+    Our experimental setup consists of a Microsoft Kinect sensor which we use as a RGB camera and one of the objects from the database. All the actions are executed by a human and we assume that there is no noise in the action execution. 
+
+    \subsection{Object recognition}
+        %*cross validation error,
+
+    \subsection{Action selection}
+        The experiment is constructed as follows. We expose an object to the Kinect sensor and obtain the recognition result. In the next step we employ the action selection algorithm to choose the best action and we execute it. In order to measure if the action improved the previous recognition we compute the posterior probability of the object. TABLE REF presents the posterior probabilities of the object as well as the best action that was chosen by the algorithm. We execute actions until the algorithm converges which means that the action selection algorithm returns says that all the actions are equally informative.
+
+        We ran the above described experiment in various conditions, i.e. different books and different starting poses(ambiguous and non-ambiguous). The results are described in TABLE REF.
+        
+        DISCUSSION
+
+
+        %*explain our setup
+        % we have a kinect, 4 object, 4 poses each, 50 sift features per object-pose pair
+        % 100 training images per object-pose pair
+        % we move the object with our hands for now
+        %  
+
+        %*assumptions
+        % perfect actions (no noise)
+        % discrete poses 
+        % we see one object at a time
+        % we see a known object
+
+        %*explain experiment
+        % we show the object to the kinect and recognize it based on our recognition module
+        % results for all objects and poses are in the table
+        % we figure out the best action (in the table)
+        % we check recognition after the action has been taken (in the table)
+
+
+%        \begin{itemize}
+%        \item explain our dataset
+%        \item show pictures of objects
+%        \item show cross validation results for our training
+%        \item explain the setup
+%        \item show real data results for object recognition (table)
+%        \item discuss the results, emphasize that the action selection works
+%        \end{itemize}

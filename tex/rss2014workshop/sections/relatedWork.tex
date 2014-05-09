@@ -7,21 +7,21 @@
 
 
     % static object recognition intro
-    Research in perception has traditionally focused on  static images and recognized objects based on a set of visual features such as SIFT~\cite{lowe2004distinctive}, SURF~\cite{bay2006surf} or ORB~\cite{rublee2011orb}.
-    There has also been plethora of work on static object recognition that resulted in various systems.
+    %Research in perception has traditionally focused on  static images and recognized objects based on a set of visual features such as SIFT~\cite{lowe2004distinctive}, SURF~\cite{bay2006surf} or ORB~\cite{rublee2011orb}.
+    %There has also been plethora of work on static object recognition that resulted in various systems.
 
     % examples of static object recognition systems 
-    One of the most efficient and robust object recognition systems was developed by Tang et al.~\cite{tang2012textured}. The authors use color model matching and SIFT feature matching to recognize the object. The algorithm also performs geometric pose estimation as well as final scene verification and refinement using global scene consistency checks. 
+    %One of the most efficient and robust object recognition systems was developed by Tang et al.~\cite{tang2012textured}. The authors use color model matching and SIFT feature matching to recognize the object. The algorithm also performs geometric pose estimation as well as final scene verification and refinement using global scene consistency checks. 
 
-    A different approach was discussed by Weijer and Khan~\cite{van2013fusing} where the authors compare various bag-of-words based recognition algorithms. The algorithm represents an image as a set of local regions where each of them is represented as a visual vocabulary. Different objects correspond to different histograms (called bags-of-words) over the created vocabulary. An extracted bag-of-words histogram can be compared to all the histograms stored in the memory and thus, an object can be labelled as one of the previously seen objects.
+    %A different approach was discussed by Weijer and Khan~\cite{van2013fusing} where the authors compare various bag-of-words based recognition algorithms. The algorithm represents an image as a set of local regions where each of them is represented as a visual vocabulary. Different objects correspond to different histograms (called bags-of-words) over the created vocabulary. An extracted bag-of-words histogram can be compared to all the histograms stored in the memory and thus, an object can be labelled as one of the previously seen objects.
 
-    Although very successful both of these approaches would not be able to correctly recognize the ambiguous object presented in~\figref{fig:pr2}. That is why we employ robot manipulation to solve that problem.
+    %Although very successful both of these approaches would not be able to correctly recognize the ambiguous object presented in~\figref{fig:pr2}. That is why we employ robot manipulation to solve that problem.
 
     %intro to interactive segmentation
     The idea of a robot interacting with the scene to improve its perceptual skills has been particularly explored in the area of interactive segmentation.
 
     %interactive segmentation
-    Segmentation of rigid objects from a video stream of objects being moved by a robot was first addressed by Fitzpatrick et. al.~\cite{fitzpatrick_active_vision} and Kenney et. al.~\cite{KenneyInteractive}. Katz and Brock~\cite{Katz-WS-MM-ICRA2011} address the problem of segmenting the articulated objects. Another technique was presented by \cite{bergstrom11icvs}, where the authors propose an approach to interactive segmentation that requires initial labeling using  a 3D segmentation through fixation which results in a rough initial segmentation. The robot interacts with the scene to disambiguate the hypotheses.
+    Segmentation of rigid objects from a video stream of objects being moved by a robot was first addressed by Fitzpatrick et. al.~\cite{fitzpatrick_active_vision} and Kenney et. al.~\cite{KenneyInteractive}. Katz and Brock~\cite{Katz-WS-MM-ICRA2011} address the problem of segmenting the articulated objects. Another technique was presented by Bergstr\"{o}m et. al.~\cite{bergstrom11icvs}, where the robot interacts with the scene to disambiguate the segmentation hypotheses.
 
     %something about methods using expected entropy?
 

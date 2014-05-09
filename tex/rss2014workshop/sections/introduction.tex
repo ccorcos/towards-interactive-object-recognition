@@ -5,19 +5,27 @@
     %* contributions?
 
 	% motivation
-	A service robot operating in human environments should be able to perform complex tasks in a variety of conditions. This requires good perception capabilities, one of which is to reliably detect and recognize objects in the scene.
+	A service robot operating in human environments should be able to perform complex tasks in various conditions. This requires perception capabilities, one of which is to reliably detect and recognize objects in the scene.
 
+	%intro of the problem
+	Current state-of-the-art object recognition systems make predictions based on static images~\cite{tang2012textured},~\cite{van2013fusing}. These systems prove limited in cases when objects are in featureless or ambiguous orientations. One of the reasons is that distinctive features may be hidden due to the pose of the object. 
+	
     % introduce the problem
-    Many state-of-the-art object recognition systems have been developed using a variety of feature extraction techniques. Despite the fact that some of them have been very successful, we still cannot say that the problem of object recognition has been solved. We claim that the reason for that is already included in the problem formulation. Given static images there are cases where it is impossible to recognize the object as it may appear ambiguous with respect to another object(see~\figref{fig:pr2}). One of the reasons for that is that distinctive features may be hidden due to the pose of the object. 
+   % Many state-of-the-art object recognition systems have been developed using a variety of feature extraction techniques. Despite the fact that some of them have been very successful, we still cannot say that the problem of object recognition has been solved. We claim that the reason for that is already included in the problem formulation. Given static images there are cases where it is impossible to recognize the object as it may appear ambiguous with respect to another object(see~\figref{fig:pr2}). One of the reasons for that is that distinctive features may be hidden due to the pose of the object. 
     
 	% general approach    
-There has been different approaches to tackle this problem. One of them is active perception, where the robot is intelligently moving around the scene to reveal more information of the object it is looking for. In this paper we present another approach where the robot interacts with the scene in order to reduce the uncertainty of the object it sees.
-    
-    % introduce the idea
-    We take advantage of robot's manipulation capabilities and apply them in the domain of object recognition. In our approach we tackle interactive object recognition problem where we look for the action that will minimize the expected entropy over objects distribution. Therefore we want to be optimal in the number of actions that will lead us to successful object recognition.
+A popular approach to tackle this problem is active perception~\cite{atanasov2013hypothesis}, where the robot is intelligently moving its camera to reveal more information about the scene. However, there are cases where this approach will not improve recognition of the object. For example, the back of a book in~\figref{fig:pr2} may not contain enough information to confidently determine what specific book is being observed.  In this paper we present a different approach where the robot interacts with the object and adjusts its pose to reveal discriminative features for determining its identity. In the ambiguous book case it means flipping the book over and observing the cover which results in more confident recognition(see~\figref{fig:pr2}).
 
-    % contributions
-    The key contributions of our approach are that (a) to the best of our knowledge, we are first to introduce the idea of a robot interacting with the scene in order to improve object recognition, (b) our approach takes into account a probabilistic object recognition model that is agnostic to the feature type, (c) we present a probabilistic action selection model that reasons about the most informative action which leads to optimality in the number of actions to recognize the object.
+%intro idea 2
+More specifically, this paper introduces a probabilistic graphical model for object and pose recognition that is agnostic of the types of  features used. This model is used to infer a distribution of posterior object probabilities conditioned on all previous actions and observations. An optimal action is selected based on the criteria of improving the confidence of object predictions after the action is taken. 
+
+    % introduce the idea
+    %In our approach we tackle interactive object recognition problem where we look for the action that will minimize the expected entropy over objects distribution. Therefore we want to be optimal in the number of actions that will lead us to successful object recognition.
+
+  % contributions
+    The key contributions of this approach are that (a) it takes into account a probabilistic object recognition model that is agnostic to the feature type, (b) it presents a probabilistic action selection model that reasons about the most informative action which leads to optimality in the number of actions to recognize the object. %To the best of our knowledge, we are the first to introduce the idea of a robot interacting with the scene in order to improve object recognition.
+
+
 
     \setlength{\tabcolsep}{0.1em}
     \begin{figure}[ht]

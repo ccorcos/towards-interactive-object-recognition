@@ -49,7 +49,18 @@
             \label{fig:tree} % TODO: Fix the images -- this is neither spine or not spine! Separate the tree from the observations and we'll have them in separate figures. Also fix the resolution
         \end{figure}
 
-        First, the ambiguous back of the book pose is observed. As expected, the posterior probabilities is split between the two ambiguous books shown in \figref{fig:expObs}.
+        First, the ambiguous back of the book pose is observed as shown in \figref{fig:expObs} (left). As expected, the posterior probabilities is split between the two ambiguous books shown in \figref{fig:expObsPost} (left).
+
+        \begin{figure}[h]
+            \centering
+            \begin{tabular}{cc} 
+                \includegraphics[scale=0.05]{pics/obs1.jpg}
+                    &
+                \includegraphics[scale=0.05]{pics/obs2.jpg}
+            \end{tabular}
+            \caption{Left: the first ambigious observation. Right: the second unambiguous observation.}
+            \label{fig:expObs}
+        \end{figure}
 
         \begin{figure}[h]
             \centering
@@ -58,11 +69,11 @@
                     &
                 \includegraphics[scale=0.4]{pics/experimentObs2.png}
             \end{tabular}
-            \caption{Posterior probabilities of object and pose for the (left) unambigious observation and (right) ambiguous observation.}
-            \label{fig:expObs}
+            \caption{Posterior probabilities of object and pose for the (left) ambigious observation and (right) unambiguous observation.}
+            \label{fig:expObsPost}
         \end{figure}
 
-        Of the four actions, staying and rotating result in similarly ambigious poses resulting in an expected entropy of $0.7$. Flipping the book over, with and without rotating, lead to similarly unambigious poses with an expected entropy of $0.0$. Because both actions lead to comparably unambigious poses, the best action can be decided based on some criteria such as minimum energy. After flipping the book, the robot observes the cover of the book and knows precisely what book it is observing, shown in \figref{fig:expObs}.
+        Of the four actions, staying and rotating result in similarly ambigious poses resulting in an expected entropy of $0.7$. Flipping the book over, with and without rotating, lead to similarly unambigious poses with an expected entropy of $0.0$. Because both actions lead to comparably unambigious poses, the best action can be decided based on some criteria such as minimum energy. After flipping the book, the robot observes the cover of the book (\figref{fig:expObs} left)and knows precisely what book it is observing (\figref{fig:expObsPost} right).
 
         The expected entropy is calculated again for each action and they are all $0.0$. This may seem peculiar, but recall that the next posterior is simply an update of the previous posterior (\eqref{eq:fullPosterior}, \eqref{eq:fullPosteriorSimplified}, \eqref{eq:posteriorUpdateGeneral}, \eqref{eq:posteriorUpdateComputation}). Once the object recognition algorithm has converged to 100\% certainty, the updated posterior will always remain the same as the previous posterior. Even if the object is moved back into an ambigious pose, the model remembers its previous observations and recalls the correct object. 
 

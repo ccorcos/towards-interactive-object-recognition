@@ -46,7 +46,7 @@ The main idea behind our approach is to choose actions that minimize the uncerta
                 \label{eq:setFeatureEvidence}
                 \prob{\set{F}} &= \sum_{n,i} \prob{\set{F}|o_n,p_i}\cdot \prob{o_n,p_i}
             \end{align}
-Please note that ~\eqref{eq:setFeatureLikelihood} is derived from d-separation caused by the measurement model assumption.
+Please note that ~\eqref{eq:setFeatureLikelihood} is derived from conditional independence caused by the measurement model assumption.
 
         \subsubsection{Interactive Object Recognition}
             To model actions, the object-recognition subgraph is extended into a time-series graph. For each pose, actions are modeled as $I$ relative pose transformations including the \italic{stay} action. In this model the Markov assumption is used where the next pose, $P_{t+1}$ is dependent only on the previous pose, $P_t$ and the previous action $A_t$. This results in a graphical model shown in \figref{fig:fullGraph}.
@@ -124,9 +124,9 @@ Please note that ~\eqref{eq:setFeatureLikelihood} is derived from d-separation c
 
 \subsubsection{Optimal Action Selection}            
             
-            We want to select the optimal action for object recognition which means moving the object into the least uncertain pose. This results in a minimum entropy of the distribution of posterior object prediction probabilities. 
+            We introduce the optimal action for object recognition which is understood as moving the object into the least uncertain pose, which results in a minimum entropy of the distribution of posterior object prediction probabilities. 
 
-            Because we have not yet observed $\set{F}_{t+1}$, we must compute the \italic{expected} entropy of the posterior in \eqref{eq:fullPosterior}. The optimal action is selected as the action which minimizes the expected entropy of object prediction posteriors across all potential actions defined by \eqref{eq:optimalAction}.
+            Because we have yet to observe $\set{F}_{t+1}$, we must compute the \italic{expected} entropy of the posterior in \eqref{eq:fullPosterior}. The optimal action is selected as the action which minimizes the expected entropy of object prediction posteriors across all potential actions defined by \eqref{eq:optimalAction}.
             {\small
             \begin{equation}
                 \label{eq:optimalAction}
@@ -145,7 +145,7 @@ Please note that ~\eqref{eq:setFeatureLikelihood} is derived from d-separation c
 %           \item what matching algorithm do we use
 %           \end{itemize}
  
-            In our implementation each feature in the model has an associated type $j$ and a value or descriptor with which to compute a similarity or matching error $\cursive{E}^j(\cdot,\cdot)$ with respect to another feature of the same type. This model predicts object and pose based on a likelihood distribution, $\prob{f|o,p}$, derived from matching errors between observed feature values, $\set{F}_{obs}$ and the set of reference feature values of the model, $\set{F}$. The features of the model are selected as the set of all unique features from all objects and poses observed in an ideal setting. Given an observation, $\set{F}_{\text{obs}}$, the best matching error with respect to a feature in the model $f^j \in \set{F}$ is given by \eqref{eq:bestMatch}.
+            Each feature in the model has an associated type $j$ and a value or descriptor with which to compute a similarity or matching error $\cursive{E}^j(\cdot,\cdot)$ with respect to another feature of the same type. This model predicts object and pose based on a likelihood distribution, $\prob{f|o,p}$, derived from matching errors between observed feature values, $\set{F}_{obs}$ and the set of reference feature values of the model, $\set{F}$. The features of the model are selected as the set of all unique features from all objects and poses observed in an ideal setting. Given an observation, $\set{F}_{\text{obs}}$, the best matching error with respect to a feature in the model $f^j \in \set{F}$ is given by \eqref{eq:bestMatch}.
             \begin{equation}
                 \label{eq:bestMatch}
                 \cursive{E}(f^j) = \min_{f^j_{\text{obs}} \in \set{F}_{\text{obs}}}\cursive{E}^j(f^j,f^j_{\text{obs}})

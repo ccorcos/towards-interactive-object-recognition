@@ -32,7 +32,7 @@
             \end{figure}
 
             % The likelihood of a feature, $\prob{f|o,p}$ is a distribution derived from feature matching errors. 
-            Each feature in the model has an associated type $j$ and a value or descriptor with which to compute a similarity or matching error $\cursive{E}^j(\cdot,\cdot)$ with respect to another feature of the same type.
+            Each feature in the model has an associated type $j$ and a value or descriptor to compute a similarity or matching error $\cursive{E}^j(\cdot,\cdot)$ with respect to another feature of the same type.
 
             This model predicts object and pose based on a likelihood distribution, $\prob{f|o,p}$, derived from matching errors between observed feature values, $\set{F}_{obs}$ and the set of reference feature values of the model, $\set{F}$. The features of the model are selected as the set of all unique features from all objects and poses observed in an ideal setting. Given an observation, $\set{F}_{\text{obs}}$, the best matching error with respect to a feature in the model $f^j \in \set{F}$ is given by \eqref{eq:bestMatch}.
             \begin{equation}
@@ -59,61 +59,6 @@
         \subsubsection{Action selection}
             To model actions, the object-recognition subgraph is extended into a time-series graph. Actions are modeled as $I$ pairwise relative pose transformations including the \italic{stay} action to determine when the algorithm has converged. The next pose, $P_{t+1}$ is dependent only on the previous pose, $P_t$ and the previous action $A_t$. This results in a graphical model shown in \figref{fig:fullGraph}.
             
-            % First Action
-                % \begin{figure}[h]
-                %   \centering
-                %   \begin{tikzpicture}
-                %     % Define nodes
-                %     \node[obs] (F) {$\set{F}_1$};
-                %     \node[latent, above=of F]  (P) {$P_1$};
-                %     \node[latent, left=of P, xshift=-1.5cm] (O) {$O$};
-                %     \node[obs, above=of P]  (A) {$A_1$};
-
-                %     \node[latent, right=of F, xshift=1.5cm] (F2) {$\set{F}_2$};
-                %     \node[latent, above=of F2]  (P2) {$P_2$};
-                %     \node[latent, above=of P2]  (A2) {$A_2$};
-
-
-                %     % Connect the nodes
-                %     \edge {P,O} {F};
-                %     \edge {P2,O} {F2};
-                %     \edge {P,A} {P2};
-
-                %     % Plates
-                %     \plate {pf} {(F)} {$M$}
-                %     \plate {pf2} {(F2)} {$M$}
-
-                %     \plate {} {(F)(P)(A)(pf)} {$t=0$}
-                %     \plate {} {(F2)(P2)(A2)(pf2)} {$t+1$}
-                %   \end{tikzpicture}
-                %   \caption{Graph model for selecting the first action.}
-                %   \label{fig:firstActionGraph}
-                % \end{figure}
-
-                % After initially observing data $\set{F}_1$, we compute the posterior for all object-poses. We consider what is the optimal action $a \in A_1$ which would lead to a new pose $P_2$ and reveal new features $\set{F}_2$. This joint distribution is factorized by equation \ref{eq:firstActionFactorized}, depicted in figure \ref{fig:firstActionGraph}.
-
-                % \begin{multline}
-                %     \label{eq:firstActionFactorized}
-                %     \prob{O,P_1,P_2,\set{F}_1, \set{F}_2, A_1} = \\ \prob{O}\prob{P_1}\prob{\set{F}_1|O,P}\prob{P_2|P_1|A_1}\prob{\set{F}_2|O,P_2}
-                % \end{multline}
-
-                %we can show how posterior looks for one action but after that let's stay with the generic formulation. Also with the graph - it should definitely be for n. That way it is more professional
-
-                % The posterior for the after the first action is computed as a simple update of the first posterior shown in equation \ref{eq:firstActionPosterior}.
-
-                % \begin{multline}
-                %   \label{eq:firstActionPosterior}
-                %   \prob{o|\set{F}_1,\set{F}_2,a} = \\ \frac{\sum_{P_1,P_2} \prob{o,P_1|\set{F}_1} \; \prob{\set{F}_2|P_2,o} \; \prob{P_2|P_1,a}}{\sum_{P_1,P_2,O} \prob{O,P_1|\set{F}_1} \; \prob{\set{F}_2|P_2,O} \; \prob{P_2|P_1,a}}
-                % \end{multline}
-
-                % To determine the optimal action we compute the minimum expected entropy of object prediction for the distribution in equation \ref{eq:firstActionPosterior} given by equation \ref{eq:firstActionOptimal}.
-                %TODO: we need more explanation on this. Why expected entropy? why does it work?
-
-                % \begin{equation}
-                %   \label{eq:firstActionOptimal}
-                %   a^* = \argmin_{A_1} \expectedValue{\entropy{O|\set{F}_1,\set{F}_2,A_1}}{\set{F}_2 \sim \prob{\set{F_2}|\set{F}_1,A_1}}
-                % \end{equation}
-
             \begin{figure}[h]
                 \centering
                 \begin{tikzpicture}
@@ -127,7 +72,7 @@
                     \node[latent, above=of F2]  (P2) {$P_2$};
                     \node[obs, above=of P2]  (A2) {$A_2$};
 
-                    \node[latent, right=of F2, xshift=1.5cm] (F3) {$f_3$};
+                    \node[latent, right=of F2, xshift=1.5cm] (F3) {$f_{t+1}$};
                     \node[latent, above=of F3]  (P3) {$P_3$};
                     \node[latent, above=of P3]  (A3) {$A_3$};
 
@@ -163,7 +108,7 @@
             \end{equation}
             % }
             
-            We define the optimal action for object recognition as moving the object into the least ambiguous pose. This results in a minimum entropy of the distribution of posterior object prediction probabilities. 
+            We define the optimal action for object recognition as moving the object into the least ambiguous pose. This results in a minimum entropy of the distribution of posterior object prediction probabilities, $\prob{O|\set{F}_{1:t+1},A_{1:t}}$
 
             Because we have not yet observed $\set{F}_{t+1}$, we must compute the \italic{expected} entropy of the posterior in \eqref{eq:fullPosterior}. The optimal action is selected as the action which minimizes the expected entropy of object prediction posteriors across all potential actions defined by \eqref{eq:optimalAction}.
             % {\small
@@ -175,25 +120,16 @@
             
     \subsection{Implementation}
 
+        Our implementation of this model leverages some assumptions for more efficient computation with dynamic programming.
+
         \subsubsection{Object recognition}
 
-            What books?
-            What poses?
-
-            Training stats? R = ? M = ?
-
-            Training errors
-
-            Cross valudation errors. Rx = ?
-
-            Our training consisted of $R=100$ samples per object-pose and $M=654$ features. 
-
-            For our model, we used only SIFT features and learned a normal distribution for the feature likelihood.   
+            For object recognition, we used only SIFT features due to time constraints. We found that a normal distribution was sufficient for describing the distribution of best SIFT feature matching errors.
             \begin{equation}
                 \prob{f|o,p} \sim \cursive{N}(\mu,\sigma)
             \end{equation}
 
-            Assuming a uniform prior on objects and poses, the posterior simplifies to \eqref{eq:firstPosteriorComputation} which can be efficiently computed with dynamic programming.
+            Assuming a uniform prior on objects and poses, the posterior simplifies from \eqref{eq:firstPosterior} to \eqref{eq:firstPosteriorComputation} which can be efficiently computed with dynamic programming.
             \begin{equation}
                 \label{eq:firstPosteriorComputation}
                 \prob{o,p|\set{F}} = \frac{\prob{\set{F}|o,p}}{\sum_{n,i} \prob{\set{F}|o_n,p_i}}
@@ -207,13 +143,14 @@
             \end{equation}
             % }
 
-            This algorithm follows a simple posterior update procedure.
+            This algorithm follows a simple posterior update procedure given in \eqref{eq:posteriorUpdateGeneral} and \eqref{eq:posteriorUpdateComputation} which is efficiently computed using dynamic programming by caching the values given in \tabref{tab:dynamicProgramming}.
+
             \begin{align}
+                \label{eq:posteriorUpdateGeneral}
                 \text{posterior}_t &= \frac{\text{posterior}_{t-1}*\text{likelihood}_t}{\text{evidence}_t}\\
+                \label{eq:posteriorUpdateComputation}
                 &= \frac{\text{posterior}_{t-1}*\text{likelihood}_t}{\sum \text{posterior}_{t-1}*\text{likelihood}_t}
             \end{align}
-
-            This is efficiently computed using dynamic programming by caching the values given in Table \ref{tab:dynamicProgramming}.
 
             \setlength{\tabcolsep}{.25em}
             \begin{table}[h]
@@ -234,9 +171,9 @@
 
             \subsubsection{Action selection}
 
-                To efficiently compute the optimal action given in \eqref{eq:optimalAction}, the posterior distribution was sampled for each action using a simple particle filtering method. 
+                To efficiently compute the optimal action given in \eqref{eq:optimalAction}, the posterior distribution is sampled using a simple Monte Carlo method. 
 
-                First, the evidence distribution given in \eqref{eq:evidenceDistribution} is sampled.
+                First, the evidence distribution given in \eqref{eq:evidenceDistribution} needs to be sampled for each potential action, $A_{t}$.
 
                 % {\small
                 \begin{equation}
@@ -245,24 +182,22 @@
                 \end{equation}
                 % }
 
-                Because actions are deterministic, this simplfies to \eqref{eq:evidenceDistributionSimplified}.
+                Because actions are deterministic, \eqref{eq:evidenceDistribution} simplfies to \eqref{eq:evidenceDistributionSimplified}.
 
-                {\small
+                % {\small
                 \begin{equation}
                     \label{eq:evidenceDistributionSimplified}
                     \prob{\set{F}_{t+1}|\set{F}_{1:t}, A_{1:t}} = \sum_{P_t,O} \prob{O,P_t|\set{F}_{1:t},A_{1:t-1}} \prob{\set{F}_{t+1}|O,P_{t+1}}
                 \end{equation}
-                }
+                % }
 
-                This distribution can be sampled trivially by first sampling object-poses based on the distribution defined by the previous posterior, $\prob{O,P_t|\set{F}_{1:t},A_{1:t-1}}$. Then, for each sampled object-pose, a particle representing a potential next observation is sampled from the feature likelihood distribution $\prob{\set{F}_{t+1}|O,P_{t+1}}$. Note that $P_{t+1}$ is computed deterministically.
+                This distribution can be sampled trivially by first sampling object-poses based on the discrete distribution defined by the previous posterior, $\prob{O,P_t|\set{F}_{1:t},A_{1:t-1}}$. Then, for each sampled object-pose, a particle representing a potential next observation is sampled from the feature likelihood distribution $\prob{\set{F}_{t+1}|O,P_{t+1}}$. Note that $P_{t+1}$ is computed deterministically.
 
-                The next posterior is then computed for by \eqref{eq:fullPosteriorSimplified} for each particle. The posterior object probability is computed simply by summing over all poses given in \eqref{eq:objectPosterior}.
+                The next posterior is computed for each particle by \eqref{eq:fullPosteriorSimplified}. The posterior object probability distribution is computed simply by summing over all poses given in \eqref{eq:objectPosterior}.
 
                 \begin{equation}
                     \label{eq:objectPosterior}
                     \prob{O|\set{F}_{1:t+1},A_{1:t}} = \sum_{P_{t+1}} \prob{O,P_{t+1}|\set{F}_{1:t+1},A_{1:t}}
                 \end{equation}
 
-                The entropy the posterior object probabilities is computed for each particle and then averaged to give the expected entropy of the object posterior. 
-
-                This is computed for each potential action and the optimal action is selected according to \eqref{eq:optimalAction} by the action which leads to the minumal expected entropy across object probabilities.
+                The entropy of the posterior object probabilities is computed for each particle and then averaged to give the expected entropy for each potential action. The optimal action is selected according to \eqref{eq:optimalAction} by the action which has the minimum expected entropy which leads to a pose with the most discriminative features of the most likelily objects.

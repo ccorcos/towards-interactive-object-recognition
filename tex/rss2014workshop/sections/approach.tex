@@ -14,7 +14,7 @@ The main idea behind our approach is to choose actions that minimize the uncerta
             
         \subsubsection{Measurement Model}
 %            The object recognition subgraph discriminatively predicts object and pose based on observed features.            
-            We use a causal measurement model $\prob{\set{F}|o,p}$ where object and pose cause the appearance of specific features that are observed by the robot. This model consists of $N$ discrete objects, $O \in \{o_1,o_2, ..., o_N\}$ in $I$ discrete poses $P \in \{p_1,p_2, ..., p_I\}$. In addition to that we model $M$ features $\set{F} = \left\{ f_1, ...,  f_M\right\}$, which is an $M$-dimensional vector of continuous random variables $f$. With these modelling choices we imply that features are conditionally independent given object and pose. The graphical model is shown in \figref{fig:objectRecognitionSubgraph}.
+            We use a causal measurement model $\prob{\set{F}|o,p}$ where object and pose cause the appearance of specific features that are observed by the robot. This model consists of $N$ discrete objects, $O \in \{o_1,o_2, ..., o_N\}$ in $I$ discrete poses $P \in \{p_1,p_2, ..., p_I\}$. In addition, we model $M$ features $\set{F} = \left\{ f_1, ...,  f_M\right\}$, which is an $M$-dimensional vector of continuous random variables $f$. With these modelling choices we imply that features are conditionally independent given object and pose. The graphical model is shown in \figref{fig:objectRecognitionSubgraph}.
 
             \begin{figure}[h]
               \centering

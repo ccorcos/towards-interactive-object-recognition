@@ -8,10 +8,10 @@
         % action selection, sampling n stuff
 
     \subsection{Probabilistic graphical model}
-        This model consists of an object recognition subgraph extended in time for modelling actions. This model is agnostic of the type of features used so long a matching error function is defined for computing the similarity features of the same type. Actions are optimally selected based on the minimum expected entropy of the object predictions for each potential action.
+        This model consists of an object recognition subgraph extended in time for modelling actions. This model is agnostic of the type of features used so long a matching error function is defined for computing the similarity of features of the same type. Actions are optimally selected based on the minimum expected entropy of the object predictions for each potential action.
             
         \subsubsection{Object recognition}
-            The object recognition subgraph discriminatively predicts object and pose based on observed features. This model consists of $N$ objects, $O \in \{o_1,o_2, ..., o_N\}$ in $I$ poses $P \in \{p_1,p_2, ..., p_I\}$. In addition, we model $M$ features $\set{F} = \left\{ f_1, ...,  f_M\right\}$, which is an $M$-dimensional vector of continuous random variables $f$. This model assumes features are conditionally independent given object and pose resulting in the graphical model shown in \figref{fig:objectRecognitionSubgraph}.
+            The object recognition subgraph discriminatively predicts object and pose based on observed features. This model consists of $N$ objects $O \in \{o_1,o_2, ..., o_N\}$ in $I$ poses $P \in \{p_1,p_2, ..., p_I\}$ evidenced by a set of $M$ features $\set{F} = \left\{ f_1, ...,  f_M\right\}$. This model assumes features are conditionally independent given object and pose resulting in the graphical model shown in \figref{fig:objectRecognitionSubgraph}.
 
             \begin{figure}[h]
               \centering
@@ -57,7 +57,7 @@
             \end{align}
 
         \subsubsection{Action selection}
-            To model actions, the object-recognition subgraph is extended into a time-series graph. Actions are modeled as $I$ pairwise relative pose transformations including the \italic{stay} action to determine when the algorithm has converged. The next pose, $P_{t+1}$ is dependent only on the previous pose, $P_t$ and the previous action $A_t$. This results in a graphical model shown in \figref{fig:fullGraph}.
+            To model actions, the object-recognition subgraph is extended into a time-series graph. Actions are modeled as $I$ pairwise relative pose transformations including the \italic{stay} action to determine when the algorithm has converged. The next pose $P_{t+1}$ is dependent only on the previous pose $P_t$ and the previous action $A_t$. This results in a graphical model shown in \figref{fig:fullGraph}.
             
             \begin{figure}[h]
                 \centering
@@ -193,7 +193,7 @@
 
                 This distribution can be sampled trivially by first sampling object-poses based on the discrete distribution defined by the previous posterior, $\prob{O,P_t|\set{F}_{1:t},A_{1:t-1}}$. Then, for each sampled object-pose, a particle representing a potential next observation is sampled from the feature likelihood distribution $\prob{\set{F}_{t+1}|O,P_{t+1}}$. Note that $P_{t+1}$ is computed deterministically.
 
-                The next posterior is computed for each particle by \eqref{eq:fullPosteriorSimplified}. The posterior object probability distribution is computed by marginalizing all poses given in \eqref{eq:objectPosterior}.
+                The next posterior is computed for each particle by \eqref{eq:fullPosteriorSimplified}. The posterior object probability is computed by marginalizing all poses given in \eqref{eq:objectPosterior}.
 
                 \begin{equation}
                     \label{eq:objectPosterior}

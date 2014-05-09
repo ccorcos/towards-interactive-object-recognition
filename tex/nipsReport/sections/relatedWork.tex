@@ -8,20 +8,17 @@
 
     % static object recognition intro
     Research in perception has traditionally focused on static images. Objects are typically recognized based on a set of extracted visual features such as SIFT~\cite{lowe2004distinctive}, SURF~\cite{bay2006surf} or ORB~\cite{rublee2011orb}.
-    There has been a plethora of work on static object recognition that resulted in a variety of systems.
+    There has been a plethora of work on static object recognition that has resulted in a variety of systems.
 
     % examples of static object recognition systems 
     One of the most efficient and robust object recognition systems was developed by Tang et al.~\cite{tang2012textured}. The authors uses color model matching and SIFT feature matching to recognize objects. The algorithm also performs geometric pose estimation as well as final scene verification and refinement using global scene consistency checks. 
 
-    A different approach was discussed by Weijer and Khan~\cite{van2013fusing} where the authors compare various bag-of-words based recognition algorithms. The algorithm represents an image as a set of local regions where each of them is represented as a visual vocabulary. Different objects correspond to different histograms (called bags-of-words) over the created vocabulary. An extracted bag-of-words histogram can be compared to all the histograms stored in the memory and thus, an object can be labelled as one of the previously seen objects.
+    A different approach was discussed by Weijer and Khan~\cite{van2013fusing} comparing various bag-of-words based recognition algorithms. The algorithm represents an image as a set of local regions representing a visual vocabulary. Different objects correspond to different histograms (called bags-of-words) over the created vocabulary. An extracted bag-of-words histogram is compared to all histograms stored in memory, predicting the object as one the previously seen objects.
 
-    Although very successful, both of these approaches would not be able solve the canonical interactive object recognition problems posed in \secref{sec:intro}.
+    Although very successful, both of these approaches would not be able solve the interactive object recognition problems posed in \secref{sec:intro}.
 
     %intro to interactive segmentation
-    The idea of a robot interacting with the scene to improve its perceptual skills has been particularly explored in the area of interactive segmentation.
-
-    %interactive segmentation
-    Interactive segmentation of rigid objects was first addressed by Fitzpatrick et. al.~\cite{fitzpatrick_active_vision} and Kenney et. al.~\cite{KenneyInteractive}. Katz and Brock~\cite{Katz-WS-MM-ICRA2011} address the problem of segmenting the articulated objects. Another technique was presented by \cite{bergstrom11icvs}, where the authors propose an approach to interactive segmentation that requires initial labeling using 3D segmentation through fixation which results in a rough initial estimate. The robot interacts with the scene to disambiguate the hypotheses.
+    The idea of a robot interacting with the scene to improve its perceptual skills has been particularly explored in the area of interactive segmentation. Interactive segmentation of rigid objects was first addressed by Fitzpatrick et. al.~\cite{fitzpatrick_active_vision} and Kenney et. al.~\cite{KenneyInteractive}. Katz and Brock~\cite{Katz-WS-MM-ICRA2011} address the problem of segmenting articulated objects. Another technique was presented by \cite{bergstrom11icvs}, where the authors propose an approach to interactive segmentation that requires initial labeling using 3D segmentation through fixation which results in a rough initial estimate. The robot interacts with the scene to disambiguate the hypotheses.
 
     %our work intro interactive object recognition
-    None of these interactive approaches take into consideration optimal action choices. This paper introduces a probabilistic method for choosing the best action based on previous actions and observations. To the best of our knowledge, the problem of interactive object recognition has not been addressed before.
+    None of these interactive approaches take into consideration optimal action choices. This paper introduces a probabilistic method for choosing the best action based on all previous actions and observations. To the best of our knowledge, the problem of determining optimal actions for interactive object recognition has not been addressed before.

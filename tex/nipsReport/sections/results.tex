@@ -1,6 +1,6 @@
 \section{Experimental results}
 
-    We evaluated the proposed approach on a dataset consisting of $N = 4$ books. We used two pairs of books which are ambiguous from the back and unambigious from the front. \figref{fig:object_dataset} shows the covers of all the books used for the experiment. Each book was trained in $I = 4$ discrete poses: up and down with the spine visible and not visible. This leads to $4$ actions: stay, rotate, flip, and flip-rotate. All poses are presented in \figref{fig:pose_dataset}. 
+    We evaluated the proposed approach on the ambigious book problem. Our dataset consists of $N = 4$ books -- two pairs of books which are ambiguous from the back and unambigious from the front. \figref{fig:object_dataset} shows the covers of all the books used for the experiment. Each book was trained in $I = 4$ discrete poses: up and down with the spine visible and not visible. This leads to $4$ actions: stay, rotate, flip, and flip-rotate. All poses are presented in \figref{fig:pose_dataset}. 
     
     \begin{figure}[h]
         \centering
@@ -18,14 +18,14 @@
         \includegraphics[width = 0.2\columnwidth]{pics/math_cover1_rot.jpg}
         \includegraphics[width = 0.2\columnwidth]{pics/math_down.jpg}
         \includegraphics[width = 0.2\columnwidth]{pics/math_down_rot.jpg}
-        \caption{All poses of a single book. From left to right: up, up-spine, down, down-spine} % TODO: spine and no spine are messed up
+        \caption{All poses of a single book. From left to right: up-spine, up, down, down-spine} % TODO: spine and no spine are messed up
     \label{fig:pose_dataset}
     \end{figure}
 
-    $M = 654$ unique features were extracted from a set of ideal images of each object-pose pair. We recorded $R = 100$ training sample for each object-pose pair to learn the likelihood distribution $\prob{f|o,p}$. For the ambiguous case, we use the same training images due to an overfitting issue in our object recognition algorithm. Our experimental setup consists of a Microsoft Kinect sensor which we use as a RGB camera. All the actions are executed by a human and we assume that actions are perfect. 
+    $M = 654$ unique features were extracted from a set of ideal images of each object-pose pair. We recorded $R = 100$ training samples for each object-pose pair to learn the likelihood distribution $\prob{f|o,p}$. For the ambiguous case, we use the same training images due to an overfitting issue in our object recognition algorithm. Our experimental setup consists of a Microsoft Kinect sensor which we use as a RGB camera. All the actions are executed by a human and we assume that actions are perfect. 
 
     \subsection{Object recognition}
-        In order to evaluate the object recognition model, we trained the model on $80$ samples and held out $20$ samples for cross validation. The average prediction accuracy results for the unambiguous cases are presented in \tabref{tab:accuracy}. It is worth emphasizing that we did not include the ambiguous poses in the cross validation results because these ambiguous cases were designed to cause static object recognition to fail. Note that all classification errors were due to confusion about whether the spine was visible or not.
+        In order to evaluate the object recognition model, we trained the model on $80$ samples and held out $20$ samples for cross validation. The average prediction accuracy results for the unambiguous cases are presented in \tabref{tab:accuracy}. It is worth emphasizing that we did not include the ambiguous poses in the training or cross validation results because these ambiguous cases were designed to cause static object recognition to fail. Note that all classification errors were due to confusion about whether the spine was visible or not.
         
         \begin{table}[h]
                 \centering
@@ -36,7 +36,7 @@
                 99.67\% & 93.75\% \\
                 \hline
                 \end{tabular}
-                \caption{Average classification accuracy for static object recognition of objects in unambiguous poses.}
+                \caption{Average classification accuracy for static object-pose recognition of objects in unambiguous poses.}
                 \label{tab:accuracy}
         \end{table}
 
@@ -75,7 +75,7 @@
             \label{fig:expObsPost}
         \end{figure}
 
-        Of the four actions, staying and rotating result in similarly ambigious poses resulting in an expected entropy of $0.7$. Flipping the book over, with and without rotating, lead to similarly unambigious poses with an expected entropy of $0$. Because both actions lead to comparably unambigious poses, the best action can be decided based on some criteria such as minimum energy. After flipping the book, the robot observes the cover of the book (\figref{fig:expObs} left)and knows precisely what book it is observing (\figref{fig:expObsPost} right).
+        Of the four actions, staying and rotating result in similarly ambigious poses resulting in an expected entropy of $0.7$. Flipping the book over, with and without rotating, lead to similarly unambigious poses with an expected entropy of $0$. Because both actions lead to comparably unambigious poses, the best action can be decided based on some criteria such as minimum energy. After flipping the book, the robot observes the cover of the book (\figref{fig:expObs} left) and knows precisely what book it is observing (\figref{fig:expObsPost} right).
 
         The expected entropy is calculated again for each action and they are all $0$. This may seem peculiar, but recall that the next posterior is simply an update of the previous posterior (\eqref{eq:fullPosterior}, \eqref{eq:fullPosteriorSimplified}, \eqref{eq:posteriorUpdateGeneral}, \eqref{eq:posteriorUpdateComputation}). Once the object recognition algorithm has converged to 100\% certainty, the updated posterior will always remain the same as the previous posterior. Even if the object is moved back into an ambigious pose, the model remembers its previous observations and recalls the correct object. 
 

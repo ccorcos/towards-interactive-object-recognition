@@ -164,11 +164,12 @@ Please note that ~\eqref{eq:setFeatureLikelihood} is derived from d-separation c
                 \prob{f|o,p} \sim \cursive{N}(\mu,\sigma)
             \end{equation}
 
-            Assuming a uniform prior on objects and poses, the posterior simplifies to \eqref{eq:firstPosteriorComputation} which can be efficiently computed with dynamic programming.
-            \begin{equation}
-                \label{eq:firstPosteriorComputation}
-                \prob{o,p|\set{F}} = \frac{\prob{\set{F}|o,p}}{\sum_{n,i} \prob{\set{F}|o_n,p_i}}
-            \end{equation}
+            The posterior probability is efficiently computed using dynamic programming.
+            
+%            \begin{equation}
+%                \label{eq:firstPosteriorComputation}
+%                \prob{o,p|\set{F}} = \frac{\prob{\set{F}|o,p}}{\sum_{n,i} \prob{\set{F}|o_n,p_i}}
+%            \end{equation}
 
             In our experiment, we consider a perfect actuator that can deterministically execute actions, i.e. $\prob{P_{t+1}|P_t,A_t} \in \{ 0 , 1 \}$. Thus, given an action and a pose, the next pose can be computed deterministically. 
 %            This simplifies our Bayesian update from \eqref{eq:fullPosterior} to \eqref{eq:fullPosteriorSimplified}.
@@ -227,7 +228,7 @@ Please note that ~\eqref{eq:setFeatureLikelihood} is derived from d-separation c
 
                 This distribution can be sampled trivially by first sampling object-poses based on the distribution defined by the previous posterior, $\prob{O,P_t|\set{F}_{1:t},A_{1:t-1}}$. Then, for each sampled object-pose, a particle representing a potential next observation is sampled from the feature likelihood distribution $\prob{\set{F}_{t+1}|O,P_{t+1}}$. Note that $P_{t+1}$ is computed deterministically.
 
-                The next posterior is then computed for by \eqref{eq:fullPosteriorSimplified} for each particle. The posterior object probability is computed by marginalization given in \eqref{eq:objectPosterior}.
+                The next posterior is then computed for by \eqref{eq:fullPosterior} for each particle. The posterior object probability is computed by marginalization given in \eqref{eq:objectPosterior}.
 
                 \begin{equation}
                     \label{eq:objectPosterior}

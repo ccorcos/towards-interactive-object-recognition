@@ -6,7 +6,7 @@
     
 $M = 654$ unique features were extracted from a set of ideal images of each object-pose pair. We recorded $100$ training sample for each object-pose pair to learn the likelihood distribution $\prob{f|o,p}$. For the ambiguous case (the book looks the same from the cover down pose) we use the same training images to amplify the ambiguity of the object recognition algorithm.
 
-    Our experimental setup consists of a Microsoft Kinect sensor which we use as a RGB camera and one of the objects from the database in our preliminary prototype. All the actions are executed by a human and we assume that there is no noise in the action execution. 
+    Our experimental setup consists of a Microsoft Kinect sensor which we use as a RGB camera and one of the books. All the actions are executed by a human and we assume that there is no noise in the action execution. 
 
     \subsection{Object Recognition}
     
@@ -29,9 +29,9 @@ $M = 654$ unique features were extracted from a set of ideal images of each obje
 
     \subsection{Action Selection}
 	Our action selection experiment is represented by the decision tree in \figref{fig:tree}.    
-	First, the ambiguous back of the book pose is observed as shown in \figref{fig:posteriors} (left). As expected, the posterior probabilities is split between the two ambiguous books shown in \figref{fig:posteriors} (left).    
+	First, the ambiguous back of the book pose is observed as shown in \figref{fig:posteriors} (top-left). As expected, the posterior probabilities is split between the two ambiguous books shown in \figref{fig:posteriors} (top-right).    
 
- Of the four actions, staying and rotating result in similarly ambiguous poses resulting in an expected entropy of $0.7$. Flipping the book over, with and without rotating, lead to similarly unambiguous poses with an expected entropy of $0$. Because both actions lead to comparably unambiguous poses, the best action can be decided based on some criteria such as minimum energy. After flipping the book, the robot observes the cover of the book (\figref{fig:posteriors} left)and knows precisely what book it is observing (\figref{fig:posteriors} right).
+ Of the four actions, staying and rotating result in similarly ambiguous poses resulting in an expected entropy of $0.7$. Flipping the book over, with and without rotating, lead to similarly unambiguous poses with an expected entropy of $0$. Because both actions lead to comparably unambiguous poses, the best action can be decided based on some criteria such as minimum energy. After flipping the book, the robot observes the cover of the book (\figref{fig:posteriors} bottom-left)and knows precisely what book it is observing (\figref{fig:posteriors} bottom-right).
 
         The expected entropy is calculated again for each action and they are all $0$. Once the object recognition algorithm has converged to 100\% certainty, the updated posterior will always remain the same as the previous posterior.
     
@@ -66,15 +66,18 @@ $M = 654$ unique features were extracted from a set of ideal images of each obje
         
         
     \begin{figure}
-    		\includegraphics[width = 0.8\columnwidth]{pics/tree_small2.png}
-    	\caption{Decision tree based on the action selection algorithm. Each node in the tree represents the expected entropy of the posterior probability for a given action. Colored nodes indicate the choice of the action that results in the minimum expected entropy. Directed edges correspond to all possible actions. Right: observed images for the observation before and after the action was taken. }
+    		\includegraphics[width = 0.7\columnwidth]{pics/tree_small.png}
+    	\caption{Decision tree based on the action selection algorithm. Each node in the tree represents the expected entropy of the posterior probability for a given action. Colored nodes indicate the choice of the action that results in the minimum expected entropy. Directed edges correspond to all possible actions.  }
     	    	\label{fig:tree}
     \end{figure}
     
     \begin{figure}
-    		\includegraphics[width = 0.49\columnwidth]{pics/experimentObs1.png}
-    		\includegraphics[width = 0.49\columnwidth]{pics/experimentObs2.png}
-	\caption{Posterior probabilities of object and pose for the observations presented in~\figref{fig:tree}.}
+    	    \raisebox{0.5\height}{\includegraphics[width = 0.39\columnwidth]{pics/obs1.jpg}}
+    		\includegraphics[width = 0.6\columnwidth]{pics/experimentObs1.png}\\
+ 		\raisebox{0.5\height}{\includegraphics[width = 0.39\columnwidth]{pics/obs2.jpg}}
+    		\includegraphics[width = 0.6\columnwidth]{pics/experimentObs2.png}
+
+	\caption{ Top-left: observed image for the first observation before the action was taken. Top-right: Posterior probability of object and pose after the first observation.	Bottom-left: observed image for the second observation after the action was taken. Bottom-right: Posterior probability of object and pose after the second observation..}
     	\label{fig:posteriors}
     \end{figure}
     

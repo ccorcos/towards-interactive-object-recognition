@@ -6,15 +6,15 @@
     % implementation
         % object recognition, features n stuff
         % action selection, sampling n stuff
-The main idea behind our approach is to choose actions to minimize the uncertainty about the object in the scene. In order to achieve this goal, we first introduce the measurement model that is later used for probabilistic object recognition. In the next step, we extend our model into a time-series graph to incorporate actions. Finally, we use minimum expected entropy measure to find the optimal action that will reduce the uncertainty of the object.
+The main idea behind our approach is to choose actions that minimize the uncertainty about the object in the scene. In order to achieve this goal, we first introduce the measurement model that is later used for probabilistic object recognition. In the next step, the model is extended into a time-series graph to incorporate actions. Finally, a minimum expected entropy measure is used to find the optimal action that will reduce the uncertainty of the object.
 
     \subsection{Probabilistic Graphical Model}
 %        This model consists of an object recognition subgraph extended in time for modelling actions. This model is agnostic of the type of features used so long a matching error function is defined for computing the similarity features of the same type. Actions are optimally selected based the minimum expected entropy of the object predictions for each potential action.
-		In this section we present an overview of the probabilistic graphical model used in our approach. The model consists of measurement model, which is used for object recognition and it is extended into interactive object recognition model that includes actions.  
+		%In this section we present an overview of the probabilistic graphical model used in our approach. The model consists of measurement model, which is used for object recognition and it is extended into interactive object recognition model that includes actions.  
             
         \subsubsection{Measurement Model}
 %            The object recognition subgraph discriminatively predicts object and pose based on observed features.            
-            We use a causal measurement model where object and pose cause the appearance of specific features that are observed by the robot. This model consists of $N$ discrete objects, $O \in \{o_1,o_2, ..., o_N\}$ in $I$ discrete poses $P \in \{p_1,p_2, ..., p_I\}$. In addition to that we model $M$ features $\set{F} = \left\{ f_1, ...,  f_M\right\}$, which is an $M$-dimensional vector of continuous random variables $f$. With these modelling choices we imply that features are conditionally independent given object and pose. The graphical model is shown in \figref{fig:objectRecognitionSubgraph}.
+            We use a causal measurement model $\prob{\set{F}|o,p}$ where object and pose cause the appearance of specific features that are observed by the robot. This model consists of $N$ discrete objects, $O \in \{o_1,o_2, ..., o_N\}$ in $I$ discrete poses $P \in \{p_1,p_2, ..., p_I\}$. In addition to that we model $M$ features $\set{F} = \left\{ f_1, ...,  f_M\right\}$, which is an $M$-dimensional vector of continuous random variables $f$. With these modelling choices we imply that features are conditionally independent given object and pose. The graphical model is shown in \figref{fig:objectRecognitionSubgraph}.
 
             \begin{figure}[h]
               \centering
@@ -46,10 +46,10 @@ The main idea behind our approach is to choose actions to minimize the uncertain
                 \label{eq:setFeatureEvidence}
                 \prob{\set{F}} &= \sum_{n,i} \prob{\set{F}|o_n,p_i}\cdot \prob{o_n,p_i}
             \end{align}
-It is worth noticing that ~\eqref{eq:setFeatureLikelihood} is derived from d-separation caused by the measurement model assumption.
+Please note that ~\eqref{eq:setFeatureLikelihood} is derived from d-separation caused by the measurement model assumption.
 
         \subsubsection{Interactive Object Recognition}
-            To model actions, the object-recognition subgraph is extended into a time-series graph. For each pose, actions are modeled as $I$ relative pose transformations including the \italic{stay} action. In this model we make use of the Markov assumption where the next pose, $P_{t+1}$ is dependent only on the previous pose, $P_t$ and the previous action $A_t$. This results in a graphical model shown in \figref{fig:fullGraph}.
+            To model actions, the object-recognition subgraph is extended into a time-series graph. For each pose, actions are modeled as $I$ relative pose transformations including the \italic{stay} action. In this model the Markov assumption is used where the next pose, $P_{t+1}$ is dependent only on the previous pose, $P_t$ and the previous action $A_t$. This results in a graphical model shown in \figref{fig:fullGraph}.
             
            
                 % After initially observing data $\set{F}_1$, we compute the posterior for all object-poses. We consider what is the optimal action $a \in A_1$ which would lead to a new pose $P_2$ and reveal new features $\set{F}_2$. This joint distribution is factorized by equation \ref{eq:firstActionFactorized}, depicted in figure \ref{fig:firstActionGraph}.
@@ -124,7 +124,7 @@ It is worth noticing that ~\eqref{eq:setFeatureLikelihood} is derived from d-sep
 
 \subsubsection{Optimal Action Selection}            
             
-            We want to select the optimal action for object recognition as moving the object into the least uncertain pose. This results in a minimum entropy of the distribution of posterior object prediction probabilities. 
+            We want to select the optimal action for object recognition which means moving the object into the least uncertain pose. This results in a minimum entropy of the distribution of posterior object prediction probabilities. 
 
             Because we have not yet observed $\set{F}_{t+1}$, we must compute the \italic{expected} entropy of the posterior in \eqref{eq:fullPosterior}. The optimal action is selected as the action which minimizes the expected entropy of object prediction posteriors across all potential actions defined by \eqref{eq:optimalAction}.
             {\small
@@ -135,7 +135,7 @@ It is worth noticing that ~\eqref{eq:setFeatureLikelihood} is derived from d-sep
             }
             
     \subsection{Implementation}
-Hereby we describe our modelling choices for the measurement model as well as introduce the implementation of the optimal action selection algorithm.
+%Hereby we describe our modelling choices for the measurement model as well as introduce the implementation of the optimal action selection algorithm.
         \subsubsection{Measurement Model}
 
 %           \begin{itemize}
@@ -153,11 +153,11 @@ Hereby we describe our modelling choices for the measurement model as well as in
                 \cursive{E}(f^j) = \min_{f^j_{\text{obs}} \in \set{F}_{\text{obs}}}\cursive{E}^j(f^j,f^j_{\text{obs}})
             \end{equation}
             
-            Training data consists of $R$ sets of observed features for each object-pose pair. The feature likelihood distribution is learned from the set of best matching errors for all training observations of a specific object-pose.
-            \begin{equation}
-                \prob{f|o,p} \sim \{\cursive{E}_1(f), ...,  \cursive{E}_R(f)\}
-            \end{equation}
-            Note that this procedure works for any type of feature given an error function. This model can also combine multiple feature types into a single measurement model. 
+%            Training data consists of $R$ sets of observed features for each object-pose pair. The feature likelihood distribution is learned from the set of best matching errors for all training observations of a specific object-pose.
+%            \begin{equation}
+%                \prob{f|o,p} \sim \{\cursive{E}_1(f), ...,  \cursive{E}_R(f)\}
+%            \end{equation}
+%            Note that this procedure works for any type of feature given an error function. This model can also combine multiple feature types into a single measurement model. 
 
             For our model, we used only SIFT features and assume a normal distribution for the feature likelihood.   
             \begin{equation}
@@ -170,13 +170,14 @@ Hereby we describe our modelling choices for the measurement model as well as in
                 \prob{o,p|\set{F}} = \frac{\prob{\set{F}|o,p}}{\sum_{n,i} \prob{\set{F}|o_n,p_i}}
             \end{equation}
 
-            In our experiment, we consider a perfect actuator that can deterministically execute actions, i.e. $\prob{P_{t+1}|P_t,A_t} \in \{ 0 , 1 \}$. Thus, given an action and a pose, the next pose can be computed deterministically. This simplifies our Bayesian update from \eqref{eq:fullPosterior} to \eqref{eq:fullPosteriorSimplified}.
-            {\small
-            \begin{multline}
-                \label{eq:fullPosteriorSimplified}
-                \prob{o,P_{t+1}|\set{F}_{1:t+1},A_{1:t}} = \\ \frac{\prob{o,P_t|\set{F}_{1:t},A_{1:t-1}} \prob{\set{F}_{t+1}|o,P_{t+1}} }{\sum_{P_t,O} \prob{O,P_t|\set{F}_{1:t},A_{1:t-1}} \prob{\set{F}_{t+1}|O,P_{t+1}} }
-            \end{multline}
-            }
+            In our experiment, we consider a perfect actuator that can deterministically execute actions, i.e. $\prob{P_{t+1}|P_t,A_t} \in \{ 0 , 1 \}$. Thus, given an action and a pose, the next pose can be computed deterministically. 
+%            This simplifies our Bayesian update from \eqref{eq:fullPosterior} to \eqref{eq:fullPosteriorSimplified}.
+%            {\small
+%            \begin{multline}
+%                \label{eq:fullPosteriorSimplified}
+%                \prob{o,P_{t+1}|\set{F}_{1:t+1},A_{1:t}} = \\ \frac{\prob{o,P_t|\set{F}_{1:t},A_{1:t-1}} \prob{\set{F}_{t+1}|o,P_{t+1}} }{\sum_{P_t,O} \prob{O,P_t|\set{F}_{1:t},A_{1:t-1}} \prob{\set{F}_{t+1}|O,P_{t+1}} }
+%            \end{multline}
+%            }
 
             
 %            \begin{align}
@@ -184,27 +185,27 @@ Hereby we describe our modelling choices for the measurement model as well as in
 %                &= \frac{\text{posterior}_{t-1}*\text{likelihood}_t}{\sum \text{posterior}_{t-1}*\text{likelihood}_t}
 %            \end{align}
 
-            This algorithm follows an efficient posterior update procedure, which is efficiently computed using dynamic programming by caching the values given in Table \ref{tab:dynamicProgramming}.
-            \begin{table}[h]
-                \centering
-                \begin{tabular}{c|c|c|c} % number of columns and vertical lines
-                    \hline % top horizontal line
-                    Time & Posterior & Evidence & Likelihood\\
-                    [0.5ex] % [0.5ex] adds vertical space
-                    \hline\hline % inserts double-line
-                    0 & $\prob{o,p}$ & & \\[0.5ex] 
-                    1 & $\prob{o,p|\set{F}_1}$ & $\prob{\set{F}_1}$ & $\prob{\set{F}_1|o,p}$ \\[0.5ex] 
-                    2 & $\prob{o,p|\set{F}_1,\set{F}_2,A_1}$ & $\prob{\set{F}_2|\set{F}_1,A_1}$ & $\prob{\set{F}_2|o,p}$ \\
-                    ...&...&...&...\\[0.5ex] 
-                    t & $\prob{o,p|\set{F}_{1:t},A_{1:t-1}}$ & $\prob{\set{F}_t|\set{F}_{1:t-1},A_{1:t-1}}$ & $\prob{\set{F}_t|o,p}$
-                \end{tabular}
-                \caption{Cache for dynamic programming.}
-                \label{tab:dynamicProgramming}
-            \end{table}
+%            This algorithm follows an efficient posterior update procedure, which is efficiently computed using dynamic programming by caching the values given in Table \ref{tab:dynamicProgramming}.
+%            \begin{table}[h]
+%                \centering
+%                \begin{tabular}{c|c|c|c} % number of columns and vertical lines
+%                    \hline % top horizontal line
+%                    Time & Posterior & Evidence & Likelihood\\
+%                    [0.5ex] % [0.5ex] adds vertical space
+%                    \hline\hline % inserts double-line
+%                    0 & $\prob{o,p}$ & & \\[0.5ex] 
+%                    1 & $\prob{o,p|\set{F}_1}$ & $\prob{\set{F}_1}$ & $\prob{\set{F}_1|o,p}$ \\[0.5ex] 
+%                    2 & $\prob{o,p|\set{F}_1,\set{F}_2,A_1}$ & $\prob{\set{F}_2|\set{F}_1,A_1}$ & $\prob{\set{F}_2|o,p}$ \\
+%                    ...&...&...&...\\[0.5ex] 
+%                    t & $\prob{o,p|\set{F}_{1:t},A_{1:t-1}}$ & $\prob{\set{F}_t|\set{F}_{1:t-1},A_{1:t-1}}$ & $\prob{\set{F}_t|o,p}$
+%                \end{tabular}
+%                \caption{Cache for dynamic programming.}
+%                \label{tab:dynamicProgramming}
+%            \end{table}
 
             \subsubsection{Optimal Action Selection}
 
-                To efficiently compute the expected entropy given in \eqref{eq:optimalAction}, the posterior distribution was sampled for each action using a Monte Carlo method. 
+                To efficiently compute the expected entropy given in \eqref{eq:optimalAction}, the posterior distribution is sampled for each action using a Monte Carlo method. 
 
                 First, the evidence distribution given in \eqref{eq:evidenceDistribution} is sampled.
 

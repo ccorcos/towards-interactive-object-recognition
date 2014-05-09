@@ -14,7 +14,7 @@ The main idea behind our approach is to choose actions that minimize the uncerta
             
         \subsubsection{Measurement Model}
 %            The object recognition subgraph discriminatively predicts object and pose based on observed features.            
-            We use a causal measurement model $\prob{\set{F}|o,p}$ where object and pose cause the appearance of specific features that are observed by the robot. This model consists of $N$ discrete objects, $O \in \{o_1,o_2, ..., o_N\}$ in $I$ discrete poses $P \in \{p_1,p_2, ..., p_I\}$. In addition, we model $M$ features $\set{F} = \left\{ f_1, ...,  f_M\right\}$, which is an $M$-dimensional vector of continuous random variables $f$. With these modelling choices we imply that features are conditionally independent given object and pose. The graphical model is shown in \figref{fig:objectRecognitionSubgraph}.
+            We use a causal measurement model $\prob{\set{F}|o,p}$ where object and pose cause the appearance of specific features that are observed by the robot. This model consists of $N$ discrete objects, $O \in \{o_1,o_2, ..., o_N\}$ in $I$ discrete poses $P \in \{p_1,p_2, ..., p_I\}$. In addition, we model $M$ features $\set{F} = \left\{ f_1, ...,  f_M\right\}$, where $\set{F}$ is an $M$-dimensional vector of continuous random variables $f$. With these modelling choices we imply that features are conditionally independent given object and pose. The graphical model is shown in \figref{fig:objectRecognitionSubgraph}.
 
             \begin{figure}[h]
               \centering
@@ -145,9 +145,7 @@ Please note that ~\eqref{eq:setFeatureLikelihood} is derived from d-separation c
 %           \item what matching algorithm do we use
 %           \end{itemize}
  
-            In our implementation each feature in the model has an associated type $j$ and a value or descriptor with which to compute a similarity or matching error $\cursive{E}^j(\cdot,\cdot)$ with respect to another feature of the same type.
-
-            The model predicts object and pose based on a likelihood distribution, $\prob{f|o,p}$, derived from matching errors between observed feature values, $\set{F}_{obs}$ and the set of reference feature values of the model, $\set{F}$. The features of the model are selected as the set of all unique features from all objects and poses observed in an ideal setting. Given an observation, $\set{F}_{\text{obs}}$, the best matching error with respect to a feature in the model $f^j \in \set{F}$ is given by \eqref{eq:bestMatch}.
+            In our implementation each feature in the model has an associated type $j$ and a value or descriptor with which to compute a similarity or matching error $\cursive{E}^j(\cdot,\cdot)$ with respect to another feature of the same type. This model predicts object and pose based on a likelihood distribution, $\prob{f|o,p}$, derived from matching errors between observed feature values, $\set{F}_{obs}$ and the set of reference feature values of the model, $\set{F}$. The features of the model are selected as the set of all unique features from all objects and poses observed in an ideal setting. Given an observation, $\set{F}_{\text{obs}}$, the best matching error with respect to a feature in the model $f^j \in \set{F}$ is given by \eqref{eq:bestMatch}.
             \begin{equation}
                 \label{eq:bestMatch}
                 \cursive{E}(f^j) = \min_{f^j_{\text{obs}} \in \set{F}_{\text{obs}}}\cursive{E}^j(f^j,f^j_{\text{obs}})
@@ -159,7 +157,7 @@ Please note that ~\eqref{eq:setFeatureLikelihood} is derived from d-separation c
 %            \end{equation}
 %            Note that this procedure works for any type of feature given an error function. This model can also combine multiple feature types into a single measurement model. 
 
-            For our model, we used only SIFT~\cite{lowe2004distinctive} features and assume a normal distribution for the feature likelihood.   
+            For our model, we used SIFT~\cite{lowe2004distinctive} features and assume a normal distribution for the feature likelihood.   
             \begin{equation}
                 \prob{f|o,p} \sim \cursive{N}(\mu,\sigma)
             \end{equation}

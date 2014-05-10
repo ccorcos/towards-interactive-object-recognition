@@ -19,35 +19,35 @@ The main idea behind our approach is to choose actions that minimize the uncerta
             
         \subsubsection{Measurement Model}
 %            The object recognition subgraph discriminatively predicts object and pose based on observed features.            
-            We use a causal measurement model $\prob{\set{F}|o,p}$ where object and pose cause the appearance of specific features that are observed by the robot. This model consists of $N$ discrete objects, $O \in \{o_1,o_2, ..., o_N\}$ in $I$ discrete poses $P \in \{p_1,p_2, ..., p_I\}$. In addition, we model $M$ features $\set{F} = \left\{ f_1, ...,  f_M\right\}$, where $\set{F}$ is an $M$-dimensional measurement vector of continuous random variables $f$. With these modelling choices we imply that features are conditionally independent given object and pose (see~\eqref{eq:setFeatureLikelihood}). The graphical model is shown in \figref{fig:objectRecognitionSubgraph}.
+            We use a causal measurement model $\prob{\set{F}|o,p}$ where object and pose cause the appearance of specific features that are observed by the robot. This model consists of $N$ discrete objects, $O \in \{o_1,o_2, ..., o_N\}$ in $I$ discrete poses $P \in \{p_1,p_2, ..., p_I\}$. In addition, we model $M$ features $\set{F} = \left\{ f_1, ...,  f_M\right\}$, where $\set{F}$ is an $M$-dimensional measurement vector of continuous random variables $f$. With these modelling choices we imply that features are conditionally independent given object and pose. The graphical model is shown in dotted lines in~\figref{fig:fullGraph}.
 
-\vspace{-1ex}
-            \begin{figure}[h]
-              \centering
-              \begin{tikzpicture}
-                % Define nodes
-                \node[obs]                            (F) {$f$};
-                \node[latent, above=of F, xshift=-1.5cm] (O) {$O$};
-                \node[latent, above=of F, xshift=1.5cm]  (P) {$P$};
+%\vspace{-1ex}
+%            \begin{figure}[h]
+%              \centering
+%              \begin{tikzpicture}
+%                % Define nodes
+%                \node[obs]                            (F) {$f$};
+%                \node[latent, above=of F, xshift=-1.5cm] (O) {$O$};
+%                \node[latent, above=of F, xshift=1.5cm]  (P) {$P$};
+%
+%                % Connect the nodes
+%                \edge {P,O} {F};
+%
+%                % Plates
+%                \plate {} {(F)} {$M$}
+%              \end{tikzpicture}
+%              \caption{Subgraph representing a probabilistic measurement model.}
+%              \vspace{-2ex}
+%              \label{fig:objectRecognitionSubgraph}
+%            \end{figure}
 
-                % Connect the nodes
-                \edge {P,O} {F};
 
-                % Plates
-                \plate {} {(F)} {$M$}
-              \end{tikzpicture}
-              \caption{Subgraph representing a probabilistic measurement model.}
-              \vspace{-2ex}
-              \label{fig:objectRecognitionSubgraph}
-            \end{figure}
-
-
-              \vspace{-2ex}
-\begin{align}
-\label{eq:setFeatureLikelihood}
-                \prob{\set{F}|o,p} &= \prod_{m=1}^{M} \prob{f_m|o,p}
-\vspace{-2ex}
-\end{align}
+%              \vspace{-2ex}
+%\begin{align}
+%\label{eq:setFeatureLikelihood}
+%                \prob{\set{F}|o,p} &= \prod_{m=1}^{M} \prob{f_m|o,p}
+%\vspace{-2ex}
+%\end{align}
 
 
  
@@ -55,9 +55,7 @@ The main idea behind our approach is to choose actions that minimize the uncerta
             The posterior of the object-pose is given by \eqref{eq:firstPosterior} assuming some prior, $\prob{o,p}$ and including the measurement model $\prob{\set{F}|o,p}$.
             \begin{align}
                 \label{eq:firstPosterior}
-                \prob{o,p|\set{F}} &= \frac{\prob{o,p} \cdot \prob{\set{F}|o,p}}{\prob{\set{F}}}\\                
-                \label{eq:setFeatureEvidence}
-                \prob{\set{F}} &= \sum_{n,i} \prob{\set{F}|o_n,p_i}\cdot \prob{o_n,p_i}
+                \prob{o,p|\set{F}} &= \frac{\prob{o,p} \cdot \prob{\set{F}|o,p}}{\sum_{n,i} \prob{\set{F}|o_n,p_i}\cdot \prob{o_n,p_i}}                              
                 \vspace{-2ex}
             \end{align}
 %Please note that ~\eqref{eq:setFeatureLikelihood} is derived from conditional independence caused by the measurement model assumption.
@@ -149,6 +147,7 @@ The main idea behind our approach is to choose actions that minimize the uncerta
             \label{eq:optimalAction}
             \small                
                 A_t^* = \argmin_{A_t} \expectedValue{ \entropy{O|\set{F}_{1:t+1},A_{1:t}} }{\set{F}_{t+1} \sim \prob{\set{F_{t+1}}|\set{F}_{1:t},A_{1:t}}}
+                \vspace{-2ex}
             \end{equation}
             }
             
@@ -181,7 +180,7 @@ The main idea behind our approach is to choose actions that minimize the uncerta
 %                \prob{f|o,p} \sim \cursive{N}(\mu,\sigma)
 %            \end{equation}
 
-            The posterior probability~\eqref{eq:fullPosterior} is efficiently computed using dynamic programming.
+            %The posterior probability~\eqref{eq:fullPosterior} is efficiently computed using dynamic programming.
             
 %            \begin{equation}
 %                \label{eq:firstPosteriorComputation}
@@ -252,6 +251,4 @@ The main idea behind our approach is to choose actions that minimize the uncerta
                     \prob{O|\set{F}_{1:t+1},A_{1:t}} = \sum_{P_{t+1}} \prob{O,P_{t+1}|\set{F}_{1:t+1},A_{1:t}}
                 \end{equation}
 
-                The entropy of the posterior object probabilities is computed for each particle and then averaged to give the expected entropy of the object posterior. 
-
-                This is computed for each potential action and the optimal action is selected according to \eqref{eq:optimalAction} by the action which leads to the minimal expected entropy across object probabilities.
+                The entropy of the posterior object probabilities is computed for each particle and then averaged to give the expected entropy of the object posterior.               This is computed for each potential action and the optimal action is selected according to \eqref{eq:optimalAction}.

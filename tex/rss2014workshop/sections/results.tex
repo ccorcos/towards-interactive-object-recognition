@@ -21,18 +21,18 @@
     		\includegraphics[width = 0.2\columnwidth]{pics/math_cover1_rot.jpg}
     		\includegraphics[width = 0.2\columnwidth]{pics/math_down.jpg}
     		\includegraphics[width = 0.2\columnwidth]{pics/math_down_rot.jpg}
-    		\caption{All the poses that are used for object-pose recognition: cover up with visible spine, cover up with no visible spine, cover down with visible spine and cover down with no visible spine.}
+    		\caption{All the poses that are used for object-pose recognition.}
 	\label{fig:pose_dataset}
     \end{figure}       
     
     
 $M = 654$ unique features were extracted from a set of ideal images of each object-pose pair. We recorded $100$ training sample for each object-pose pair to learn the likelihood distribution $\prob{f|o,p}$. For the ambiguous case (the book looks the same from the cover down pose) we use the same training images to amplify the ambiguity of the object recognition algorithm.
 
-    Our experimental setup consists of a Microsoft Kinect sensor which we use as a RGB camera and one of the books. In our preliminary experiment all the actions are executed by a human and we assume that there is no noise in the action execution. 
+    Our experimental setup consists of a RGB camera and one of the books. In our preliminary experiment all the actions are executed by a human.
 
     \subsection{Object Recognition}
     
-	In order to evaluate the object recognition model, we trained the model on $80$ samples and held out $20$ samples for cross validation. The average prediction accuracy result for the unambiguous cases for training data is equal to $99.67\%$ and for the cross validation it equals $93.75\%$. It is worth emphasizing that we did not include the ambiguous poses in the cross validation results because these ambiguous cases were designed to cause static object recognition to fail. Please note that all classification errors are due to confusion about whether the spine was visible or not.    
+	In order to evaluate the object recognition model, we trained the model on $80$ samples and held out $20$ samples for cross validation. The average prediction accuracy result for the unambiguous cases for training data is equal to $99.67\%$ and for the cross validation it equals $93.75\%$. We did not include the ambiguous poses in the cross validation results because these ambiguous cases were designed to cause static object recognition to fail.    
     
  
         
@@ -52,7 +52,7 @@ $M = 654$ unique features were extracted from a set of ideal images of each obje
     \begin{figure}
     \centering
     		\includegraphics[width = 0.7\columnwidth]{pics/tree_small.png}
-    	\caption{Decision tree based on the action selection algorithm. Each node in the tree represents the expected entropy of the posterior probability for a given action. Colored nodes indicate the choice of the action that results in the minimum expected entropy. Directed edges correspond to all possible actions.}
+    	\caption{Decision tree based on the action selection algorithm. Each node in the tree represents the expected entropy of the posterior probability for a given action. Colored nodes indicate the choice of the action that results in the minimum expected entropy.}
     	    	\label{fig:tree}
     \end{figure}
     
@@ -62,17 +62,18 @@ $M = 654$ unique features were extracted from a set of ideal images of each obje
  		\raisebox{0.5\height}{\includegraphics[width = 0.39\columnwidth]{pics/obs2.jpg}}
     		\includegraphics[width = 0.6\columnwidth]{pics/experimentObs2.png}
 
-	\caption{ Top-left: observed image for the first observation before the action was taken. Top-right: Posterior probability of object and pose after the first observation.	Bottom-left: observed image for the second observation after the action was taken. Bottom-right: Posterior probability of object and pose after the second observation.}
+	\caption{ Top-left: observed image for the first observation. Top-right: Posterior probability of object and pose after the first observation.	Bottom: Analogous graphs after the second observation (i.e. after the action was taken).}
     	\label{fig:posteriors}
     \end{figure}
 
+\vspace{-1ex}
     \subsection{Action Selection}
 	Our action selection experiment is represented by the decision tree in \figref{fig:tree}.    
 	First, the ambiguous back of the book pose is observed as shown in \figref{fig:posteriors} (top-left). As expected, the posterior probabilities is split between the two ambiguous books shown in \figref{fig:posteriors} (top-right).    
 
  Of the four actions, staying and rotating result in similarly ambiguous poses resulting in an expected entropy of $0.7$. Flipping the book over, with and without rotating, lead to similarly unambiguous poses with an expected entropy of $0$. After flipping the book, the robot observes the cover of the book (\figref{fig:posteriors} bottom-left) and knows precisely what book it is observing (\figref{fig:posteriors} bottom-right).
 
-        The expected entropy is calculated again for each action and they are all $0$, which means that there is no action that will provide the reduction of the expected entropy - the algorithm has converged. %Once the object recognition algorithm has converged to 100\% certainty, the updated posterior will always remain the same as the previous posterior.
+        %The expected entropy is calculated again for each action and they are all $0$, which means that there is no action that will provide the reduction of the expected entropy - the algorithm has converged. %Once the object recognition algorithm has converged to 100\% certainty, the updated posterior will always remain the same as the previous posterior.
     
     
         %The experiment is constructed as follows. We expose an object to the Kinect sensor and obtain the recognition result. In the next step we employ the action selection algorithm to choose the best action and we execute it.~\figref{fig:tree} presents a decision tree that is visualizes the best action actions chosen by the algorithm and the respective observations. In order to measure if the action improved the previous recognition we compute the posterior probability of the object, which is shown together with the respective observation in~\figref{fig:posteriors}. We execute actions until the algorithm converges which means that the action selection algorithm returns says that all the actions do not provide a reduction of expected entropy.

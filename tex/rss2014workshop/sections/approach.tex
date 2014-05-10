@@ -1,3 +1,5 @@
+% !TEX root = ../main.tex
+
 \section{Approach}
     % general probabilistic model 
         % object recognition
@@ -6,7 +8,7 @@
     % implementation
         % object recognition, features n stuff
         % action selection, sampling n stuff
-The main idea behind our approach is to choose actions that minimize the uncertainty about the object in the scene. In order to achieve this goal, we first introduce the measurement model that is later used for probabilistic object recognition. In the next step, the model is extended into a time-series graph to incorporate actions. Finally, a minimum expected entropy measure is used to find the optimal action that will reduce the uncertainty of the object.
+The main idea behind our approach is to choose actions that minimize the uncertainty about the object in the scene. In order to achieve this goal, we first introduce our generic feature-based measurement model that is later used for probabilistic object recognition. In the next step, the model is extended into a time-series graph to incorporate actions. Finally, an expected entropy measure is used to find the optimal action that will minimize the uncertainty of the object.
 
     \subsection{Probabilistic Graphical Model}
 %        This model consists of an object recognition subgraph extended in time for modelling actions. This model is agnostic of the type of features used so long a matching error function is defined for computing the similarity features of the same type. Actions are optimally selected based the minimum expected entropy of the object predictions for each potential action.

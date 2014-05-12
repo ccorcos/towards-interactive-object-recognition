@@ -39,10 +39,13 @@ The key contributions of this approach are that (a) it takes into account a prob
     \setlength{\tabcolsep}{0.1em}
     \begin{figure}[ht]
     \begin{tabular}{cccc}
-    \multicolumn{2}{c}{\multirow{-5}{*}{\includegraphics[width=0.46\columnwidth]{pics/pr2_init.jpg}}} & \includegraphics[width=0.23\columnwidth]{pics/first_back.jpg} 
-    &\includegraphics[width=0.23\columnwidth]{pics/first_cover1.jpg} \\
-    \multicolumn{2}{c}{} & \includegraphics[width=0.23\columnwidth]{pics/first_back.jpg} 
-    &\includegraphics[width=0.23\columnwidth]{pics/first_cover2.jpg} \\
+    \multicolumn{2}{c}{\multirow{-5}{*}{\includegraphics[width=0.46\columnwidth]{pics/pr2_init.jpg}}} & \multicolumn{2}{c} {\begin{overpic}[width=0.46\columnwidth]{pics/first1.jpg} 
+    \put(40,46){Book 1}
+    \end{overpic}}\\
+    %&\includegraphics[width=0.23\columnwidth]{pics/first_cover1.jpg} \\
+    \multicolumn{2}{c}{} &  \multicolumn{2}{c} {\begin{overpic}[width=0.46\columnwidth]{pics/first2.jpg} 
+    \put(40,46){Book 2}
+    \end{overpic}} \\
     \multicolumn{2}{c}{\includegraphics[width=0.45\columnwidth]{pics/pr2_grasp.jpg}}
     & \multicolumn{2}{c}{\includegraphics[width=0.45\columnwidth]{pics/pr2_rotate.jpg}}
     \end{tabular}

@@ -32,7 +32,7 @@ $M = 654$ unique features were extracted from a set of ideal images of each obje
 
     \subsection{Object Recognition}
     
-	In order to evaluate the object recognition model, we trained the model on $80$ samples and held out $20$ samples for cross validation. The average prediction accuracy result for the unambiguous cases for training data is equal to $99.67\%$ and for the cross validation it equals $93.75\%$. We did not include the ambiguous poses in the cross validation results because these ambiguous cases were designed to cause static object recognition to fail.    
+	In order to evaluate the object recognition model, we trained the model on $80$ samples and held out $20$ samples for cross validation. The average prediction accuracy result for the unambiguous cases for training data is $99.67\%$ and for the cross validation is $93.75\%$. We did not include the ambiguous poses in the cross validation results because these ambiguous cases were designed to cause static object recognition to fail.    
     
  
         
@@ -68,7 +68,7 @@ $M = 654$ unique features were extracted from a set of ideal images of each obje
 
 \vspace{-1ex}
     \subsection{Action Selection}
-	Our action selection experiment is represented by the decision tree in \figref{fig:tree}.    
+	One of our action selection experiment is represented by the decision tree in \figref{fig:tree}.    
 	First, the ambiguous back of the book pose is observed as shown in \figref{fig:posteriors} (top-left). As expected, the posterior probabilities is split between the two ambiguous books shown in \figref{fig:posteriors} (top-right).    
 
  Of the four actions, staying and rotating result in similarly ambiguous poses resulting in an expected entropy of $0.7$. Flipping the book over, with and without rotating, lead to similarly unambiguous poses with an expected entropy of $0$. After flipping the book, the robot observes the cover of the book (\figref{fig:posteriors} bottom-left) and knows precisely what book it is observing (\figref{fig:posteriors} bottom-right).

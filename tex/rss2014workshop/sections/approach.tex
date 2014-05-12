@@ -19,7 +19,7 @@ The main idea behind our approach is to choose actions that minimize the uncerta
             
         \subsubsection{Measurement Model}
 %            The object recognition subgraph discriminatively predicts object and pose based on observed features.            
-            We use a causal measurement model $\prob{\set{F}|o,p}$ where object and pose cause the appearance of specific features that are observed by the robot. This model consists of $N$ discrete objects, $O \in \{o_1,o_2, ..., o_N\}$ in $I$ discrete poses $P \in \{p_1,p_2, ..., p_I\}$. In addition, we model $M$ features $\set{F} = \left\{ f_1, ...,  f_M\right\}$, where $\set{F}$ is an $M$-dimensional measurement vector of continuous random variables $f$. With these modelling choices we imply that features are conditionally independent given object and pose. The graphical model is shown in dotted lines in~\figref{fig:fullGraph}.
+            We use a causal measurement model $\prob{\set{F}|o,p}$ where object and pose cause the appearance of specific features that are observed by the robot. The graphical model is shown in dotted lines in~\figref{fig:fullGraph}. This model consists of $N$ discrete objects, $O \in \{o_1,o_2, ..., o_N\}$ in $I$ discrete poses $P \in \{p_1,p_2, ..., p_I\}$. In addition, we model $M$ features $\set{F} = \left\{ f_1, ...,  f_M\right\}$, where $\set{F}$ is a set of continuous random variables $f_i$. With these modelling choices we imply that features are conditionally independent given object and pose. 
 
 %\vspace{-1ex}
 %            \begin{figure}[h]
@@ -137,9 +137,9 @@ The main idea behind our approach is to choose actions that minimize the uncerta
 \vspace{-2ex}
 \subsubsection{Optimal Action Selection}            
             
-            We introduce the optimal action for object recognition which is understood as moving the object into the pose in which the next measurement allows to maximally reduce the uncertainty of the object-pose. This results in a minimum entropy of the distribution of posterior object prediction probabilities. 
+            We introduce the optimal action for object recognition which is understood as moving the object into the pose in which the next measurement allows to minimize the uncertainty of the object-pose. This results in a minimum entropy of the distribution of posterior object prediction probabilities. 
 
-            Because we have yet to observe $\set{F}_{t+1}$, we must compute the \italic{expected} entropy of the posterior in \eqref{eq:fullPosterior}. The optimal action is selected as the action which minimizes the expected entropy of object prediction posteriors across all potential actions defined by \eqref{eq:optimalAction}.
+            Because we have yet to observe $\set{F}_{t+1}$, we must compute the \italic{expected} entropy of the posterior in \eqref{eq:fullPosterior}. The optimal action is selected as the action which minimizes the expected entropy of object prediction posteriors across all potential actions:
             
             
             {
@@ -151,7 +151,7 @@ The main idea behind our approach is to choose actions that minimize the uncerta
             \end{equation}
             }
             
-            \vspace{-4ex}
+            \vspace{-1ex}
     \subsection{Implementation}
 %Hereby we describe our modelling choices for the measurement model as well as introduce the implementation of the optimal action selection algorithm.
         \subsubsection{Measurement Model}
@@ -175,7 +175,7 @@ The main idea behind our approach is to choose actions that minimize the uncerta
 %            \end{equation}
 %            Note that this procedure works for any type of feature given an error function. This model can also combine multiple feature types into a single measurement model. 
 
-            For our model, we used SIFT~\cite{lowe2004distinctive} features and approximate a normal distribution for the feature likelihood.   
+            For our model, we used SIFT~\cite{lowe2004distinctive} features and approximate the feature likelihood by a normal distribution.   
 %            \begin{equation}
 %                \prob{f|o,p} \sim \cursive{N}(\mu,\sigma)
 %            \end{equation}
@@ -242,13 +242,13 @@ The main idea behind our approach is to choose actions that minimize the uncerta
 %                \end{equation}
 %                }
 
-                This distribution can be sampled trivially by first sampling object-poses based on the distribution defined by the previous posterior, $\prob{O,P_t|\set{F}_{1:t},A_{1:t-1}}$. Then, for each sampled object-pose, a particle representing a potential next observation is sampled from the feature likelihood distribution $\prob{\set{F}_{t+1}|O,P_{t+1}}$. In our experiment, we consider a perfect actuator that can deterministically execute actions, i.e. $\prob{P_{t+1}|P_t,A_t} \in \{ 0 , 1 \}$. Thus, given an action and a pose, the next pose can be computed deterministically.
+                This distribution can be sampled trivially by first sampling object-poses based on the distribution defined by the previous posterior, $\prob{O,P_t|\set{F}_{1:t},A_{1:t-1}}$. Then, for each sampled object-pose, a sample representing a potential next observation is sampled from the feature likelihood distribution $\prob{\set{F}_{t+1}|O,P_{t+1}}$. In our experiment, we consider a perfect actuator that can deterministically execute actions, i.e. $\prob{P_{t+1}|P_t,A_t} \in \{ 0 , 1 \}$. Thus, given an action and a pose, the next pose can be computed deterministically.
 
-                The next posterior is then computed by \eqref{eq:fullPosterior} for each particle. The posterior object probability is computed by marginalization given in \eqref{eq:objectPosterior}.
+                The next posterior is then computed by \eqref{eq:fullPosterior} for each sample. The posterior object probability is computed by marginalization given in \eqref{eq:objectPosterior}.
 
                 \begin{equation}
                     \label{eq:objectPosterior}
                     \prob{O|\set{F}_{1:t+1},A_{1:t}} = \sum_{P_{t+1}} \prob{O,P_{t+1}|\set{F}_{1:t+1},A_{1:t}}
                 \end{equation}
 
-                The entropy of the posterior object probabilities is computed for each particle and then averaged to give the expected entropy of the object posterior.               This is computed for each potential action and the optimal action is selected according to \eqref{eq:optimalAction}.
+                The entropy of the posterior object probabilities is computed for each sample and then averaged to give the expected entropy of the object posterior.               This is computed for each potential action and the optimal action is selected according to \eqref{eq:optimalAction}.

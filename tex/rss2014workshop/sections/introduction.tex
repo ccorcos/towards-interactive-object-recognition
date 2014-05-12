@@ -26,7 +26,7 @@ All these approaches, however, assume predefined, known actions that are perform
 %% approach
 In this work we introduce a probabilistic method for choosing object manipulation actions to optimally reveal information about objects in a scene based on the robot's observations.
 To the best of our knowledge, the problem of interactive object recognition has not been addressed before. 
-Our novel approach enables a robot to interact with objects and adjusts their pose to reveal discriminative features for determining its identity.
+Our novel approach enables a robot to interact with objects and adjusts their pose to reveal discriminative features for determining their identity.
 In the ambiguous book example (see~\figref{fig:pr2}), this means flipping the book over and observing the cover, which results in more confident recognition.
 Our method is based on a probabilistic graphical model for feature-based object and pose recognition.
 By inferring a distribution of posterior object probabilities conditioned on all previous actions and observations, our approach enables a robot to select the optimal action to reduce the uncertainty of object recognition.
@@ -46,7 +46,7 @@ The key contributions of this approach are that (a) it takes into account a prob
     \multicolumn{2}{c}{\includegraphics[width=0.45\columnwidth]{pics/pr2_grasp.jpg}}
     & \multicolumn{2}{c}{\includegraphics[width=0.45\columnwidth]{pics/pr2_rotate.jpg}}
     \end{tabular}
-    \caption{Top-left: The service robot PR2 trying to recognize a book based on the back. Database of objects consists of book 1 (top-right, NE and NW) and book 2, (top-right, SE and SW) that look the same from the back. PR2 has to take the optimal action in order to recognize which book it is. In this case it means it flips it over (bottom-left, bottom-right).}
+    \caption{Top-left: The service robot PR2 trying to recognize a book based on its back. The database of objects consists of book 1 (top-right, NE and NW) and book 2, (top-right, SE and SW) that look the same from the back. PR2 takes the optimal action in order to recognize which book it is. In this case it means it flips it over (bottom-left, bottom-right).}
     \vspace{-4ex}
 
     \label{fig:pr2}

@@ -21,18 +21,18 @@ However, there are many cases where this approach will fail, since distinctive f
 %% interactive perception: segmentation
 The complementary idea of a robot interacting with the scene to improve its perceptual capabilities by revealing informative surfaces has been particularly explored in the area of segmentation.
 Examples are the interactive segmentation of rigid objects being moved by a robot~\cite{KenneyInteractive}, the segmentation of articulated objects~\cite{Katz-WS-MM-ICRA2011}, and the disambiguation of segmentation hypothesis~\cite{bergstrom11icvs}.
-All these approaches, however, assume predefined, known actions that are performed either by a human or a robot.
+All these approaches, however, do not reason about what actions to take in order to achieve the goal.
 
 %% approach
 In this work we introduce a probabilistic method for choosing object manipulation actions to optimally reveal information about objects in a scene based on the robot's observations.
 To the best of our knowledge, the problem of interactive object recognition has not been addressed before. 
-Our novel approach enables a robot to interact with objects and adjusts their pose to reveal discriminative features for determining their identity.
+Our novel approach enables a robot to interact with objects and adjust their pose to reveal discriminative features for determining their identity.
 In the ambiguous book example (see~\figref{fig:pr2}), this means flipping the book over and observing the cover, which results in more confident recognition.
 Our method is based on a probabilistic graphical model for feature-based object and pose recognition.
-By inferring a distribution of posterior object probabilities conditioned on all previous actions and observations, our approach enables a robot to select the optimal action to reduce the uncertainty of object recognition.
+By inferring posterior distributions of object probabilities conditioned on all previous actions and observations, our approach enables a robot to select the optimal action to reduce the uncertainty of object recognition.
 
 %% contributions
-The key contributions of this approach are that (a) it takes into account a probabilistic object recognition model that is agnostic to the feature type and (b) it presents a probabilistic action selection model that reasons about the most informative action, which leads to optimality in the number of actions to recognize the object.
+The key contributions of this approach are that (a) it presents a probabilistic action selection model that reasons about the most informative action, which leads to optimality in the number of actions to recognize the object and (b) it takes into account a probabilistic object recognition model that is independent of the feature type.
 
 
 

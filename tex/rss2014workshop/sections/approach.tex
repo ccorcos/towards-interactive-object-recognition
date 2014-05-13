@@ -10,16 +10,16 @@
     % implementation
         % object recognition, features n stuff
         % action selection, sampling n stuff
-The main idea behind our approach is to choose actions that minimize the uncertainty about the object in the scene. In order to achieve this goal, we first introduce our generic feature-based measurement model that is later used for probabilistic object recognition. In the next step, the model is extended into a time-series graph to incorporate actions. Finally, an expected entropy measure is used to find the optimal action that will minimize the uncertainty of the object.
+The main idea behind our approach is to choose actions that minimize the uncertainty about the object in the scene. In order to achieve this goal, we first introduce our feature-based observation model that is later used for probabilistic object recognition. In the next step, we extend the model into a time-series graph to incorporate actions. Finally, we propose an expected entropy measure to find the optimal action that will minimize the uncertainty of the object.
 \vspace{-1ex}
     \subsection{Probabilistic Graphical Model}
     \vspace{-0.5ex}
 %        This model consists of an object recognition subgraph extended in time for modelling actions. This model is agnostic of the type of features used so long a matching error function is defined for computing the similarity features of the same type. Actions are optimally selected based the minimum expected entropy of the object predictions for each potential action.
-		%In this section we present an overview of the probabilistic graphical model used in our approach. The model consists of measurement model, which is used for object recognition and it is extended into interactive object recognition model that includes actions.  
+		%In this section we present an overview of the probabilistic graphical model used in our approach. The model consists of observation model, which is used for object recognition and it is extended into interactive object recognition model that includes actions.  
             
-        \subsubsection{Measurement Model}
+        \subsubsection{Observation Model}
 %            The object recognition subgraph discriminatively predicts object and pose based on observed features.            
-            We use a causal measurement model $\prob{\set{F}|o,p}$ where object and pose cause the appearance of specific features that are observed by the robot. The graphical model is shown in dotted lines in~\figref{fig:fullGraph}. This model consists of $N$ discrete objects, $O \in \{o_1,o_2, ..., o_N\}$ in $I$ discrete poses $P \in \{p_1,p_2, ..., p_I\}$. In addition, we model $M$ features $\set{F} = \left\{ f_1, ...,  f_M\right\}$, where $\set{F}$ is a set of continuous random variables $f_i$. With these modelling choices we imply that features are conditionally independent given object and pose. 
+            We use an observation model $\prob{\set{F}|o,p}$ where object and pose result in the appearance of specific features that are observed by the robot. The graphical model is shown in dotted lines in~\figref{fig:fullGraph}. This model consists of $N$ discrete objects, $O \in \{o_1,o_2, ..., o_N\}$ in $I$ discrete poses $P \in \{p_1,p_2, ..., p_I\}$. In addition, we model $M$ features $\set{F} = \left\{ f_1, ...,  f_M\right\}$, where $\set{F}$ is a set of continuous random variables $f_i$. With these modelling choices we imply that features are conditionally independent given the object and its pose. 
 
 %\vspace{-1ex}
 %            \begin{figure}[h]
@@ -36,7 +36,7 @@ The main idea behind our approach is to choose actions that minimize the uncerta
 %                % Plates
 %                \plate {} {(F)} {$M$}
 %              \end{tikzpicture}
-%              \caption{Subgraph representing a probabilistic measurement model.}
+%              \caption{Subgraph representing a probabilistic observation model.}
 %              \vspace{-2ex}
 %              \label{fig:objectRecognitionSubgraph}
 %            \end{figure}
@@ -52,16 +52,16 @@ The main idea behind our approach is to choose actions that minimize the uncerta
 
  
 \subsubsection{Object Recognition}            
-            The posterior of the object-pose is given by \eqref{eq:firstPosterior} assuming some prior, $\prob{o,p}$ and including the measurement model $\prob{\set{F}|o,p}$.
+            The posterior of the object-pose is given by \eqref{eq:firstPosterior} assuming some prior, $\prob{o,p}$ and including the observation model $\prob{\set{F}|o,p}$.
             \begin{align}
                 \label{eq:firstPosterior}
                 \prob{o,p|\set{F}} &= \frac{\prob{o,p} \cdot \prob{\set{F}|o,p}}{\sum_{n,i} \prob{\set{F}|o_n,p_i}\cdot \prob{o_n,p_i}}                              
                 \vspace{-2ex}
             \end{align}
-%Please note that ~\eqref{eq:setFeatureLikelihood} is derived from conditional independence caused by the measurement model assumption.
+%Please note that ~\eqref{eq:setFeatureLikelihood} is derived from conditional independence caused by the observation model assumption.
 
         \subsubsection{Interactive Object Recognition}
-            To model actions, the object-recognition subgraph is extended into a time-series graph. For each pose, actions are modeled as $I$ relative pose transformations including the \italic{stay} action. In this model the Markov assumption is used where the next pose, $P_{t+1}$ is dependent only on the previous pose, $P_t$ and the previous action $A_t$. This results in the graphical model shown in \figref{fig:fullGraph}.
+            To model actions, the object-recognition subgraph is extended into a time-series graph. For each pose, actions are modeled as $I$ pose transformations including the \italic{stay} action. In this model the Markov assumption is used where the next pose, $P_{t+1}$ is dependent only on the previous pose, $P_t$ and the previous action $A_t$. This results in the graphical model shown in \figref{fig:fullGraph}.
             
            
                 % After initially observing data $\set{F}_1$, we compute the posterior for all object-poses. We consider what is the optimal action $a \in A_1$ which would lead to a new pose $P_2$ and reveal new features $\set{F}_2$. This joint distribution is factorized by equation \ref{eq:firstActionFactorized}, depicted in figure \ref{fig:firstActionGraph}.
@@ -113,16 +113,16 @@ The main idea behind our approach is to choose actions that minimize the uncerta
                     \plate {pf2} {(F2)} {$M$}
                     \plate {pf3} {(F3)} {$M$}
 
-                    \plate {} {(F)(P)(A)(pf)} {$t=1$}
-                    \plate {} {(F2)(A2)(pf2)} {$t=2$}
-                    \plate {} {(F3)(A3)(pf3)} {$t=3$}
+                    %\plate {} {(F)(P)(A)(pf)} {$t=1$}
+                    %\plate {} {(F2)(A2)(pf2)} {$t=2$}
+                    %\plate {} {(F3)(A3)(pf3)} {$t=3$}
                     
                     \plate [opacity=0.0] {hiddenPlate} {(F)(P)(pf)} {}
-					\plate [dotted] {} {(F)(P)(O)(pf)(hiddenPlate)} {$\text{measurement model}$}
+					\plate [dotted] {} {(F)(P)(O)(pf)(hiddenPlate)} {$\text{observation model}$}
 
                     % \draw [dotted, thick, scale=0.6] (7.5,1.5) -- (7.85,1.5);
                 \end{tikzpicture}
-                \caption{Full probabilistic graphical model for interactive object recognition.}
+                \caption{Probabilistic graphical model for interactive object recognition.}
                                 \vspace{-1ex}
                 \label{fig:fullGraph}
             \end{figure}
@@ -137,7 +137,7 @@ The main idea behind our approach is to choose actions that minimize the uncerta
 \vspace{-2ex}
 \subsubsection{Optimal Action Selection}            
             
-            We introduce the optimal action for object recognition which is understood as moving the object into the pose in which the next measurement allows to minimize the uncertainty of the object-pose. This results in a minimum entropy of the distribution of posterior object prediction probabilities. 
+            We introduce the optimal action for object recognition which is understood as moving the object into the pose in which the next observation allows to minimize the uncertainty of the object. This results in a minimum entropy of the distribution of posterior object prediction probabilities. 
 
             Because we have yet to observe $\set{F}_{t+1}$, we must compute the \italic{expected} entropy of the posterior in \eqref{eq:fullPosterior}. The optimal action is selected as the action which minimizes the expected entropy of object prediction posteriors across all potential actions:
             
@@ -153,8 +153,8 @@ The main idea behind our approach is to choose actions that minimize the uncerta
             
             \vspace{-1ex}
     \subsection{Implementation}
-%Hereby we describe our modelling choices for the measurement model as well as introduce the implementation of the optimal action selection algorithm.
-        \subsubsection{Measurement Model}
+%Hereby we describe our modelling choices for the observation model as well as introduce the implementation of the optimal action selection algorithm.
+        \subsubsection{Observation Model}
 
 %           \begin{itemize}
 %           \item discuss how we create the database
@@ -173,9 +173,9 @@ The main idea behind our approach is to choose actions that minimize the uncerta
 %            \begin{equation}
 %                \prob{f|o,p} \sim \{\cursive{E}_1(f), ...,  \cursive{E}_R(f)\}
 %            \end{equation}
-%            Note that this procedure works for any type of feature given an error function. This model can also combine multiple feature types into a single measurement model. 
+%            Note that this procedure works for any type of feature given an error function. This model can also combine multiple feature types into a single observation model. 
 
-            For our model, we used SIFT~\cite{lowe2004distinctive} features and approximate the feature likelihood by a normal distribution.   
+            For our model, we used SIFT~\cite{lowe2004distinctive} features and approximate the distribution of $e(f^j)$ by a normal distribution.   
 %            \begin{equation}
 %                \prob{f|o,p} \sim \cursive{N}(\mu,\sigma)
 %            \end{equation}
@@ -222,9 +222,9 @@ The main idea behind our approach is to choose actions that minimize the uncerta
 
             \subsubsection{Optimal Action Selection}
 
-                To efficiently compute the expected entropy given in \eqref{eq:optimalAction}, the posterior distribution is sampled for each action using a Monte Carlo method. 
+                To efficiently compute the expected entropy given in \eqref{eq:optimalAction}, the posterior distribution is sampled for each action using Markov Chain Monte Carlo method. 
 
-                First, the evidence distribution given in \eqref{eq:evidenceDistribution} is sampled.
+                First, the evidence given in \eqref{eq:evidenceDistribution} is sampled.
 
                 {\small
                 \begin{multline}

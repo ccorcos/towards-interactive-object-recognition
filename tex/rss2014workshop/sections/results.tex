@@ -2,7 +2,7 @@
 
 
 
-    We evaluated the proposed approach on a dataset consisting of $N = 4$ books in $I = 4$ poses. We used two pairs of books which are ambiguous from the back and unambigious from the front. \figref{fig:object_dataset} shows the covers of all the books used for the experiment. All object poses are presented in \figref{fig:pose_dataset}. 
+    We evaluated the proposed approach on a dataset consisting of $N = 4$ books in $I = 4$ poses. We used two pairs of books which are ambiguous on the back and unambigious on the front. \figref{fig:object_dataset} shows the covers of all the books used for the experiment. All poses are presented in \figref{fig:pose_dataset}. 
     
 \begin{figure}
 \centering
@@ -21,18 +21,18 @@
     		\includegraphics[width = 0.2\columnwidth]{pics/math_cover1_rot.jpg}
     		\includegraphics[width = 0.2\columnwidth]{pics/math_down.jpg}
     		\includegraphics[width = 0.2\columnwidth]{pics/math_down_rot.jpg}
-    		\caption{All the poses that are used for object-pose recognition.}
+    		\caption{All the poses used for object-pose recognition. Note the visibility of the spine}
 	\label{fig:pose_dataset}
     \end{figure}       
     
     
-$M = 654$ unique features were extracted from a set of ideal images of each object-pose pair. We recorded $100$ training sample for each object-pose pair to learn the likelihood distribution $\prob{f|o,p}$. For the ambiguous case (the book looks the same from the cover down pose) we use the same training images to amplify the ambiguity of the object recognition algorithm.
+$M = 654$ unique features were extracted from a set of ideal images of each object-pose pair. We recorded $100$ training samples for each object-pose pair to learn the likelihood distribution $\prob{f|o,p}$. For the ambiguous cases, we used the same training images.
 
-    Our experimental setup consists of a RGB camera and one of the books. In our preliminary experiment all the actions are executed by a human.
+    Our experimental setup consists of an RGB camera and one of the books. All the actions were executed by a human.
 
     \subsection{Object Recognition}
     
-	In order to evaluate the object recognition model, we trained the model on $80$ samples and held out $20$ samples for cross validation. The average prediction accuracy result for the unambiguous cases for training data is $99.67\%$ and for the cross validation is $93.75\%$. We did not include the ambiguous poses in the cross validation results because these ambiguous cases were designed to cause static object recognition to fail.    
+	In order to evaluate the object recognition model, we trained the model on $80$ samples and held out $20$ samples for cross validation. The average prediction accuracy for the unambiguous cases is $99.67\%$ for the training data and $93.75\%$ for the cross validation data. We did not include the ambiguous poses in the cross validation results because these ambiguous cases were designed to cause static object recognition to fail. It is also worth noting that the only errors were confusion between whether the spine was visible or not.
     
  
         
@@ -68,10 +68,10 @@ $M = 654$ unique features were extracted from a set of ideal images of each obje
 
 \vspace{-1ex}
     \subsection{Action Selection}
-	One of our action selection experiment is represented by the decision tree in \figref{fig:tree}.    
-	First, the ambiguous back of the book pose is observed as shown in \figref{fig:posteriors} (top-left). As expected, the posterior probabilities is split between the two ambiguous books shown in \figref{fig:posteriors} (top-right).    
+	An action selection experiment is represented by the decision tree in \figref{fig:tree}.    
+	The ambiguous back of the book pose was observed as shown in \figref{fig:posteriors} (top-left). As expected, the posterior probabilities were split between the two ambiguous books shown in \figref{fig:posteriors} (top-right).    
 
- Of the four actions, staying and rotating result in similarly ambiguous poses resulting in an expected entropy of $0.7$. Flipping the book over, with and without rotating, lead to similarly unambiguous poses with an expected entropy of $0$. After flipping the book, the robot observes the cover of the book (\figref{fig:posteriors} bottom-left) and knows precisely what book it is observing (\figref{fig:posteriors} bottom-right).
+ Of the four actions, staying and rotating result in similarly ambiguous poses resulting in an expected entropy of $0.7$. Flipping the book over, with and without rotating, lead to similarly unambiguous poses with an expected entropy of $0$. After flipping the book, the robot observes the cover (\figref{fig:posteriors} bottom-left) and predicted the correct object with 100\% certainty (\figref{fig:posteriors} bottom-right).
 
         %The expected entropy is calculated again for each action and they are all $0$, which means that there is no action that will provide the reduction of the expected entropy - the algorithm has converged. %Once the object recognition algorithm has converged to 100\% certainty, the updated posterior will always remain the same as the previous posterior.
     

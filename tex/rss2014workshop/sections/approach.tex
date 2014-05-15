@@ -10,7 +10,7 @@
     % implementation
         % object recognition, features n stuff
         % action selection, sampling n stuff
-Our approach chooses actions that minimize the uncertainty about on object being observed. We introduce a feature-based observation model that is used for probabilistic object recognition. We extend this model into a time-series graph to incorporate actions. Finally, we propose an expected entropy measure to find the optimal action that will minimize the uncertainty of the object.
+Our approach chooses actions that minimize the uncertainty about an object being observed. We introduce a feature-based observation model that is used for probabilistic object recognition. We extend this model into a time-series graph to incorporate actions. Finally, we propose an expected entropy measure to find the optimal action that will minimize the uncertainty of the object.
 \vspace{-1ex}
     \subsection{Probabilistic Graphical Model}
     \vspace{-0.5ex}
@@ -52,7 +52,7 @@ Our approach chooses actions that minimize the uncertainty about on object being
 
  
 \subsubsection{Object Recognition}            
-            The posterior of the object-pose is given by \eqref{eq:firstPosterior} assuming some prior, $\prob{o,p}$. % and including the observation model $\prob{\set{F}|o,p}$.
+            The posterior of the object-pose is given by \eqref{eq:firstPosterior} with some prior $\prob{o,p}$ and the observation model $\prob{\set{F}|o,p}$.
             \begin{align}
                 \label{eq:firstPosterior}
                 \prob{o,p|\set{F}} &= \frac{\prob{o,p} \cdot \prob{\set{F}|o,p}}{\sum_{n,i} \prob{\set{F}|o_n,p_i}\cdot \prob{o_n,p_i}}                              
@@ -127,7 +127,7 @@ Our approach chooses actions that minimize the uncertainty about on object being
                 \label{fig:fullGraph}
             \end{figure}
             
-            The posterior at time $t+1$ given the entire history of observations and actions is a Bayesian update of the posterior at time $t$ given in \eqref{eq:fullPosterior}.
+            The posterior at time $t+1$ given the entire history of observations and actions is a recursive Bayesian update of the posterior at time $t$ given in \eqref{eq:fullPosterior}.
             {\small
             \begin{multline}
                 \label{eq:fullPosterior}
@@ -222,7 +222,7 @@ Our approach chooses actions that minimize the uncertainty about on object being
 
             \subsubsection{Optimal Action Selection}
 
-                To efficiently compute the expected entropy given in \eqref{eq:optimalAction}, the posterior distribution is sampled. % for each action using Markov Chain Monte Carlo method. 
+                To efficiently compute the expected entropy given in \eqref{eq:optimalAction}, the posterior distribution is sampled for each action.% using Markov Chain Monte Carlo method. 
 
                 First, the evidence given in \eqref{eq:evidenceDistribution} is sampled.
 
@@ -242,7 +242,7 @@ Our approach chooses actions that minimize the uncertainty about on object being
 %                \end{equation}
 %                }
 
-                This distribution can be sampled trivially by first sampling object-poses based on the discrete distribution defined by the previous posterior, $\prob{O,P_t|\set{F}_{1:t},A_{1:t-1}}$. Then, for each sampled object-pose, a sample representing a potential next observation is taken from the feature likelihood distribution $\prob{\set{F}_{t+1}|O,P_{t+1}}$. In our experiment, we assume a perfect actuator, i.e. $\prob{P_{t+1}|P_t,A_t} \in \{ 0 , 1 \}$. Thus, given an action and a pose, the next pose can be computed deterministically.
+                This distribution can be sampled trivially by first sampling object-poses based on the discrete distribution defined by the previous posterior, $\prob{O,P_t|\set{F}_{1:t},A_{1:t-1}}$. Then, for each sampled object-pose, a sample representing a potential next observation is drawn from the feature likelihood distribution $\prob{\set{F}_{t+1}|O,P_{t+1}}$. In our experiment, we assume a perfect actuator, i.e. $\prob{P_{t+1}|P_t,A_t} \in \{ 0 , 1 \}$. Thus, given an action and a pose, the next pose can be computed deterministically.
 
                 The next posterior is computed for each sample by \eqref{eq:fullPosterior}. The posterior object probability is computed by marginalization given in \eqref{eq:objectPosterior}.
 
@@ -251,4 +251,4 @@ Our approach chooses actions that minimize the uncertainty about on object being
                     \prob{O|\set{F}_{1:t+1},A_{1:t}} = \sum_{P_{t+1}} \prob{O,P_{t+1}|\set{F}_{1:t+1},A_{1:t}}
                 \end{equation}
 
-                The entropy of the posterior object probabilities is computed for each sample and then averaged to give the expected entropy of the object posterior. The expected enntropy is computed for each potential action and the optimal action is selected according to \eqref{eq:optimalAction}.
+                The entropy of the posterior object probabilities is computed for each sample and then averaged to give the expected entropy of the object posterior. The expected entropy is computed for each potential action and the optimal action is selected according to \eqref{eq:optimalAction}.

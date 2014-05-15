@@ -11,12 +11,13 @@
 % Extending the capabilities of robots for providing services in complex human environments has become a popular field of research.
 % In this domain, perception capabilities such as recognizing objects in a scene are crucial to reliably perform service tasks in various conditions.
 %% challenges
+Object recognition is a key component of service robots for finding and handling objects.
 Current state-of-the-art object recognition systems recognize objects based on static images~\cite{tang2012textured,van2013fusing}.
 However, these systems prove limited in cases when objects are in ambiguous orientations or distinctive features are hidden due to the pose of the object.
 
 %% related work
 %% active perception    
-A popular approach to tackle this problem is active perception~\cite{atanasov2013hypothesis}, where the robot intelligently moves to reveal more information about the scene.
+A popular approach to tackle this problem is active perception~\cite{atanasov2013hypothesis}, where the robot intelligently moves its camera to reveal more information about the scene.
 However, there are cases where this approach will fail because distinctive features are hidden, for example, on the bottom side of the object (see \figref{fig:pr2}).
 %% interactive perception: segmentation
 Interacting with a scene to improve perception by revealing informative surfaces has been particularly explored in the area of segmentation.
@@ -32,7 +33,7 @@ Our method is based on a probabilistic graphical model for feature-based object 
 By inferring posterior distributions of object probabilities conditioned on all previous actions and observations, our approach enables a robot to select the optimal action to reduce the uncertainty of object recognition.
 
 %% contributions
-The key contributions of this approach are: (a) it presents a probabilistic action selection model that reasons about the most informative action and (b) it uses a probabilistic object recognition model that is agnostic of the feature type.
+The key contributions of this approach are: (a) it presents a probabilistic action selection model that reasons about the most informative action and (b) it uses a probabilistic object recognition model that is indifferent of the feature type.
 
 
 

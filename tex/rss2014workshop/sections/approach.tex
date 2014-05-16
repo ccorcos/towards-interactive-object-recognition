@@ -10,7 +10,7 @@
     % implementation
         % object recognition, features n stuff
         % action selection, sampling n stuff
-Our approach chooses actions that minimize the uncertainty about an object being observed. We introduce a feature-based observation model that is used for probabilistic object recognition. We extend this model into a time-series graph to incorporate actions. Finally, we propose an expected entropy measure to find the optimal action that will minimize the uncertainty of the object.
+Our approach chooses actions that minimize the uncertainty about an object being observed. We introduce a feature-based observation model that is used for probabilistic object recognition. We extend this model into a temporal graphical model to incorporate actions. Finally, we propose an expected entropy measure to find the optimal action that will minimize the uncertainty of the object.
 \vspace{-1ex}
     \subsection{Probabilistic Graphical Model}
     \vspace{-0.5ex}
@@ -61,7 +61,7 @@ Our approach chooses actions that minimize the uncertainty about an object being
 %Please note that ~\eqref{eq:setFeatureLikelihood} is derived from conditional independence caused by the observation model assumption.
 
         \subsubsection{Interactive Object Recognition}
-            To model actions, the object-recognition subgraph is extended into a time-series graph. For each pose, actions are modeled as $I$ relative pose transformations including the \italic{stay} action. In this model, the next pose $P_{t+1}$ is dependent only on the previous pose $P_t$ and the previous action $A_t$. This results in the graphical model shown in \figref{fig:fullGraph}.
+            To model actions, the object-recognition subgraph is extended into a temporal graphical model. For each pose, actions are modeled as $I$ relative pose transformations including the \italic{stay} action. In this model, the next pose $P_{t+1}$ is dependent only on the previous pose $P_t$ and the previous action $A_t$. This results in the graphical model shown in \figref{fig:fullGraph}.
             
            
                 % After initially observing data $\set{F}_1$, we compute the posterior for all object-poses. We consider what is the optimal action $a \in A_1$ which would lead to a new pose $P_2$ and reveal new features $\set{F}_2$. This joint distribution is factorized by equation \ref{eq:firstActionFactorized}, depicted in figure \ref{fig:firstActionGraph}.

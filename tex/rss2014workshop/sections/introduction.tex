@@ -21,16 +21,16 @@ A popular approach to tackle this problem is active perception~\cite{atanasov201
 However, there are cases where this approach will fail because distinctive features are hidden, for example, on the bottom side of the object (see \figref{fig:pr2}).
 %% interactive perception: segmentation
 Interacting with a scene to improve perception by revealing informative surfaces has been particularly explored in the area of segmentation.
-Examples are interactive segmentation of rigid objects being moved by a robot~\cite{KenneyInteractive}, segmentation of articulated objects~\cite{Katz-WS-MM-ICRA2011}, and disambiguation of segmentation hypothesis~\cite{bergstrom11icvs}.
+Examples are: interactive segmentation of rigid objects being moved by a robot~\cite{KenneyInteractive}, segmentation of articulated objects~\cite{Katz-WS-MM-ICRA2011}, and disambiguation of segmentation hypothesis~\cite{bergstrom11icvs}.
 However, none of these approaches reason about what actions to take in order to achieve the goal.
 
 %% approach
-In this work we introduce a probabilistic method for choosing object manipulation actions to optimally reveal information about objects in a scene based on a robot's observations.
+In this work we introduce a probabilistic method for choosing object manipulation actions to optimally reveal information about objects in a scene based on robot's observations.
 To the best of our knowledge, the problem of interactive object recognition has not been addressed before. 
-Our approach determines the optinal action for a robot to interact with objects and adjust their pose to reveal discriminative features for determining their identity.
+Our approach determines the optimal action for a robot to interact with objects and adjust their pose to reveal discriminative features for determining their identity.
 In the ambiguous book example (see~\figref{fig:pr2}), this means flipping the book over and observing the cover, which results in more confident recognition.
 Our method is based on a probabilistic graphical model for feature-based object and pose recognition.
-By inferring posterior distributions of object probabilities conditioned on all previous actions and observations, our approach enables a robot to select the optimal action to reduce the uncertainty of object recognition.
+By inferring posterior distributions of object probabilities conditioned on all previous actions and observations, our approach enables a robot to select the optimal action to reduce the uncertainty of the object.
 
 %% contributions
 The key contributions of this approach are: (a) it presents a probabilistic action selection model that reasons about the most informative action and (b) it uses a probabilistic object recognition model that is indifferent of the feature type.

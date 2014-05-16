@@ -19,7 +19,7 @@ Our approach chooses actions that minimize the uncertainty about an object being
             
         \subsubsection{Observation Model}
 %            The object recognition subgraph discriminatively predicts object and pose based on observed features.            
-            We use an observation model $\prob{\set{F}|o,p}$ where object and pose result in the appearance of specific features that are observed by the robot. This graphical model is shown in dotted lines in~\figref{fig:fullGraph}. This model consists of $N$ discrete objects, $O \in \{o_1,o_2, ..., o_N\}$ in $I$ discrete poses $P \in \{p_1,p_2, ..., p_I\}$. We model $M$ features $\set{F} = \left\{ f_1, ...,  f_M\right\}$ where $\set{F}$ is a set of continuous random variables $f_i$. This model assumes features are conditionally independent given an object and its pose. 
+            We use an observation model $\prob{\set{F}|o,p}$ where object and pose result in the appearance of specific features that are observed by the robot. This graphical model is shown in dotted lines in~\figref{fig:fullGraph}. The model consists of $N$ discrete objects, $O \in \{o_1,o_2, ..., o_N\}$ in $I$ discrete poses $P \in \{p_1,p_2, ..., p_I\}$. We model $M$ features $\set{F} = \left\{ f_1, ...,  f_M\right\}$ where $\set{F}$ is a set of continuous random variables $f_i$. This model assumes features are conditionally independent given an object and its pose. 
 
 %\vspace{-1ex}
 %            \begin{figure}[h]
@@ -163,7 +163,7 @@ Our approach chooses actions that minimize the uncertainty about an object being
 %           \item what matching algorithm do we use
 %           \end{itemize}
  
-            Each feature in the model has an associated type $j$ and a value or descriptor with which to compute a similarity or matching error $\cursive{E}^j(\cdot,\cdot)$ with respect to another feature of the same type. Object and pose is predicted using a model $\prob{f|o,p}$ derived from matching errors between observed feature values, $\set{F}_{obs}$ and the set of reference feature values of the model, $\set{F}$. The features of the model are selected as the set of all unique features from all objects and poses observed in an ideal setting. Given an observation, $\set{F}_{\text{obs}}$, the best matching error $e$ with respect to a feature in the model $f^j \in \set{F}$ is given by \eqref{eq:bestMatch}.
+            Each feature in the model has an associated type $j$ and a value or descriptor with which to compute a similarity or matching error $\cursive{E}^j(\cdot,\cdot)$ with respect to another feature of the same type. Object and pose are predicted using a model $\prob{f|o,p}$ derived from matching errors between observed feature values, $\set{F}_{obs}$ and the set of reference feature values of the model, $\set{F}$. The features of the model are selected as the set of all unique features from all objects and poses observed in an ideal setting. Given an observation, $\set{F}_{\text{obs}}$, the best matching error $e$ with respect to a feature in the model $f^j \in \set{F}$ is given by \eqref{eq:bestMatch}.
             \begin{equation}
                 \label{eq:bestMatch}
                 e(f^j) = \min_{f^j_{\text{obs}} \in \set{F}_{\text{obs}}}\cursive{E}^j(f^j,f^j_{\text{obs}})

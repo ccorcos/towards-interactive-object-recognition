@@ -13,20 +13,18 @@
 %% challenges
 Object recognition is a key component of service robots for finding and handling objects.
 Current state-of-the-art object recognition systems recognize objects based on static images~\cite{tang2012textured,van2013fusing}.
-However, these systems prove limited in cases when objects are in ambiguous orientations or distinctive features are hidden due to the pose of the object.
+However, these systems prove limited in cases when objects are in ambiguous orientations or distinctive features are hidden, e.g., due to the pose of the object.
  
 
 %% related work
 %% active perception    
 A popular approach to tackle this problem is active perception~\cite{atanasov2013hypothesis,hollinger2011active}, where the robot intelligently moves its camera to reveal more information about the scene.
 However, there are cases where this approach will fail because distinctive features are hidden, for example, on the bottom side of the object (see \figref{fig:pr2}).
-%% interactive perception: segmentation
-
-
 These cases are particularly common in cluttered environments, where features might be occluded not only due to the pose of the object but also by other items in the scene. 
-It has been recently studied in the area of interactive perception that interacting with the scene exposes new possibilities to tackle common perception problems. This paper is an introduction to the intelligent action selection problem, which in the long run will improve interactive perception methods.
+It has been recently studied in the area of interactive perception that interacting with the scene exposes new possibilities to tackle common perception problems.
+This paper addresses both challenges---selecting an object of a cluttered scene for manipulation and picking the optimal movement of this object---in an information-theoretic way to improve interactive perception methods.
 
-
+%% interactive perception: segmentation
 Interacting with a scene to improve perception by revealing informative surfaces has been particularly explored in the area of segmentation.
 Examples are: interactive segmentation of rigid objects being moved by a robot~\cite{KenneyInteractive}, segmentation of articulated objects~\cite{Katz-WS-MM-ICRA2011}, and disambiguation of segmentation hypothesis~\cite{bergstrom11icvs}.
 However, none of these approaches reason about what actions to take in order to achieve the goal.

@@ -1,3 +1,5 @@
+% !TEX root = ../main.tex
+
 \section{Experimental Results}
 
 
@@ -6,10 +8,10 @@
     
 \begin{figure}
 \centering
-    		\includegraphics[width = 0.2\columnwidth]{pics/math_cover1_ok.jpg}
-    		\includegraphics[width = 0.2\columnwidth]{pics/math_cover2_ok.jpg}
-    		\includegraphics[width = 0.2\columnwidth]{pics/first_cover1.jpg}
-    		\includegraphics[width = 0.2\columnwidth]{pics/first_cover2.jpg}
+    		\includegraphics[height = 0.25\columnwidth]{pics/math_cover1_ok.jpg}
+    		\includegraphics[height = 0.25\columnwidth]{pics/math_cover2_ok.jpg}
+    		\includegraphics[height = 0.25\columnwidth]{pics/first_cover1.jpg}
+    		\includegraphics[height = 0.25\columnwidth]{pics/first_cover2.jpg}
     		\caption{Books from the cover side used for the experiment. Two first books and two last books look the same from the back side.}
 	\label{fig:object_dataset}
     \end{figure}     
@@ -17,10 +19,10 @@
     
      \begin{figure}
      \centering
-    		\includegraphics[width = 0.2\columnwidth]{pics/math_cover1.jpg}
-    		\includegraphics[width = 0.2\columnwidth]{pics/math_cover1_rot.jpg}
-    		\includegraphics[width = 0.2\columnwidth]{pics/math_down.jpg}
-    		\includegraphics[width = 0.2\columnwidth]{pics/math_down_rot.jpg}
+    		\includegraphics[height = 0.2\columnwidth]{pics/math_cover1.jpg}
+    		\includegraphics[height = 0.2\columnwidth]{pics/math_cover1_rot.jpg}
+    		\includegraphics[height = 0.2\columnwidth]{pics/math_down.jpg}
+    		\includegraphics[height = 0.2\columnwidth]{pics/math_down_rot.jpg}
     		\caption{All the poses used for object-pose recognition. Please note the visibility of the spine.}
 	\label{fig:pose_dataset}
     \end{figure}       
@@ -57,12 +59,13 @@ $M = 654$ unique features were extracted from a set of ideal images of each obje
     \end{figure}
     
     \begin{figure}
-    	    \raisebox{0.5\height}{\includegraphics[width = 0.39\columnwidth]{pics/obs1.jpg}}
-    		\includegraphics[width = 0.6\columnwidth]{pics/experimentObs1.png}\\
- 		\raisebox{0.5\height}{\includegraphics[width = 0.39\columnwidth]{pics/obs2.jpg}}
-    		\includegraphics[width = 0.6\columnwidth]{pics/experimentObs2.png}
-
-	\caption{ Top-left: observed image for the first observation. Top-right: Posterior probability of object and pose after the first observation.	Bottom: Analogous graphs after the second observation (i.e. after the action was taken).}
+    \begin{tabular}{cc}
+    	\includegraphics[width = 0.39\columnwidth]{pics/obs1.jpg} &
+ 		  \includegraphics[width = 0.39\columnwidth]{pics/obs2.jpg} \\
+  		\includegraphics[width = 0.5\columnwidth]{pics/experimentObs1.png} &
+   		\includegraphics[width = 0.5\columnwidth]{pics/experimentObs2.png}
+		\end{tabular}
+	\caption{ Left: observed image for the first observation (top) and the corresponding posterior probability of object and pose after the first observation (bottom).	Right: Analogous graphs after the second observation (i.e. after the action was taken).}
     	\label{fig:posteriors}
     \end{figure}
 

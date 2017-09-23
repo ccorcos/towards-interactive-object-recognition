@@ -1,7 +1,7 @@
 Towards Interactive Object Recognition
 ======================================
 
-![](/model.pdf)
+![](/model.png)
 
 This is the work of Chet Corcos and Karol Hausman for a class on probabilistic graphical models. It features a dynamic bayesian network to compute optimal actions for object recognition.
 
